@@ -1,0 +1,2 @@
+Last update: 2019.03.17
+SQLite version: 3.27.2 (3270200)
