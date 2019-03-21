@@ -43,3 +43,11 @@ get_sqlite_cli_binary <- function(use_sys_exe = TRUE){
 
 }
 
+execute_query <- function(sqlite_conn, option = NULL, db_path, query){
+
+  cmd <- paste0(sqlite_conn@binary, " '", sqlite_conn@db_path, "' ", "'", option, "' ", "'", query, "'")
+  output <- system(command = cmd, intern = T)
+
+  return(output)
+
+}
