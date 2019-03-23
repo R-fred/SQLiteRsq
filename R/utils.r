@@ -43,15 +43,58 @@ get_sqlite_cli_binary <- function(use_sys_exe = TRUE){
 
 }
 
-execute_query <- function(sqlite_conn, option = NULL, db_path, query){
+execute_query <- function(sqlite_conn, option = NULL, db_path, query, append){
 
   cmd <- paste0(sqlite_conn@binary, " '", sqlite_conn@db_path, "' ", "'", option, "' ", "'", query, "'")
   output <- system(command = cmd, intern = T)
 
   return(output)
 
+  # append: add only new records to the database.
+  # Either implement in SQL code, or check before in R.
+  # Dynamic choice? i.e. from a certain number of rows, what is the fastest option?
+
+
 }
 
-create_query <- function(qry_string, object){
+create_query <- function(qry_type, table, object, values){
+
+  # qry_type: defines if INSERT, DELETE, UPDATE, UPSERT, SELECT
+  # based on that, call the proper function to put query together.
+  #
+  # table: table to execute the query against
+  #
+  # object: optional, the object to use, can be a dataframe
+  #
+  # values: single values to enter in database
+  #
+
+}
+
+chk_tbl_exists <- function(conn, tbl){
+
+}
+
+chk_tbl_headers <- function(conn, tbl){
+
+}
+
+qry_delete <- function(tbl, ...){
+
+}
+
+qry_insert <- function(tbl,){
+
+}
+
+qry_select <- function(tbl, col){
+
+}
+
+qry_update <- function(tbl, ...){
+
+}
+
+qry_upsert <- function(tbl, ...){
 
 }
