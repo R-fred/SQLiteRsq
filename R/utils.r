@@ -51,3 +51,7 @@ execute_query <- function(sqlite_conn, option = NULL, db_path, query){
   return(output)
 
 }
+
+create_query <- function(qry_string, object){
+
+}
