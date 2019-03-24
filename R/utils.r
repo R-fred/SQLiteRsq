@@ -73,6 +73,8 @@ create_query <- function(qry_type, table, object, values){
 
 chk_tbl_exists <- function(conn, tbl){
 
+  qry <- sprintf("")
+
 }
 
 chk_tbl_headers <- function(conn, tbl){

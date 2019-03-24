@@ -2,11 +2,22 @@ context("utils")
 
 test_that("Get os version", {
   os <- sessionInfo()[[2]]
-  expect_true(grepl(pattern = get_os(), x = os))
+  expect_true(grepl(pattern = os, x = get_os()))
 })
 
-test_that("Get proper sqlite binary", {
-  expect_true(str_length("a"), 1)
-  expect_equal(str_length("ab"), 2)
-  expect_equal(str_length("abc"), 3)
+test_that("Get sqlite cli. Linux", {
+  os <- "linux"
+  sqlite_bin_os <- get_sqlite_cli_binary(use_sys_exe = T)
+  sqlite_bin_pkg <- get_sqlite_cli_binary(use_sys_exe = F)
+  expect_true(grepl(pattern = "/usr/bin/sqlite3", x = sqlite_bin_os))
+  expect_false(grepl(pattern = "/usr/bin/sqlite3", x = sqlite_bin_pkg))
+  expect_true(grepl(pattern = "linux/sqlite3", x = sqlite_bin_pkg))
+})
+
+test_that("Get sqlite cli. Windows", {
+  os <- "windows"
+  sqlite_bin_os <- get_sqlite_cli_binary(use_sys_exe = T)
+  sqlite_bin_pkg <- get_sqlite_cli_binary(use_sys_exe = F)
+  expect_false(grepl(pattern = "/bin/windows/sqlite3.exe", x = sqlite_bin_os))
+  expect_true(grepl(pattern = "/bin/windows/sqlite3.exe", x = sqlite_bin_pkg))
 })
