@@ -85,11 +85,39 @@ qry_delete <- function(tbl, ...){
 
 }
 
-qry_insert <- function(tbl,){
+qry_insert <- function(tbl, type = c("values", "select", "default"), values){
+
+  qry_vals <- values
+
+  qry <- "\"INSERT INTO tbl VALUES('ID1', 'value1', 'value2')\";"
+
+}
+
+qry_insert_values <- function(){
+
+}
+
+qry_insert_select <- function(){
+
+}
+
+qry_insert_default <- function(){
+
+}
+
+qry_insert_file <- function(file_name){
+
+  qry <- "insert into tbl VALUES('ID3', 'value4', readfile('C:/Users/fches/Pictures/Wilfried/_DSC5527.ARW'));"
 
 }
 
 qry_select <- function(tbl, col){
+
+}
+
+qry_select_file <- function(selection_qry){
+
+  qry <- "select writefile('C:/Users/fches/DSC5527.ARW', value_2) FROM tbl WHERE ID='ID3';"
 
 }
 
