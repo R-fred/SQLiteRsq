@@ -1,3 +1,5 @@
+# GENERAL ----
+
 get_os <-  function(){
 
   info <- capture.output(sessionInfo())
@@ -43,6 +45,7 @@ get_sqlite_cli_binary <- function(use_sys_exe = TRUE){
 
 }
 
+# QUERIES ----
 execute_query <- function(sqlite_conn, option = NULL, db_path, query, append){
 
   cmd <- paste0(sqlite_conn@binary, " '", sqlite_conn@db_path, "' ", "'", option, "' ", "'", query, "'")
@@ -137,5 +140,10 @@ qry_where <- function(field, value, comparison = c(">", "<", "=", "LIKE")){
 
   qry <- paste0("WHERE ", field, "=", "'",value, "'")
   qry <- paste0("WHERE ", field, "=", value)
+
+}
+
+# BACKUP ----
+db_backup <- function(){
 
 }

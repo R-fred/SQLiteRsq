@@ -1,5 +1,6 @@
+# Class also provides info about tables and fields.
 setClass("SQLiteConn",
-         representation(binary = "character", db_path = "character"),
+         representation(binary = "character", db_path = "character", tables, fields),
          prototype = list(binary = .sqlite_bin)
 )
 
