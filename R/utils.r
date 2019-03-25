@@ -128,3 +128,14 @@ qry_update <- function(tbl, ...){
 qry_upsert <- function(tbl, ...){
 
 }
+
+qry_where <- function(field, value, comparison = c(">", "<", "=", "LIKE")){
+
+  #check for type of value.
+  #Only accept, character or numeric
+  #value inserted depending on type.
+
+  qry <- paste0("WHERE ", field, "=", "'",value, "'")
+  qry <- paste0("WHERE ", field, "=", value)
+
+}
