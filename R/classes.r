@@ -1,15 +1,27 @@
 # Class also provides info about tables and fields.
 setClass("SQLiteConn",
-         representation(binary = "character", db_path = "character", tables, fields),
+         slots = list(binary = "character",
+                      db_path = "character",
+                      conn_string = "character",
+                      tables = "list",
+                      fields = "list"
+                      ),
          prototype = list(binary = .sqlite_bin)
 )
 
-setGeneric("CreateConnectString", function(x){standardGeneric("CreateConnectString")})
-setMethod("CreateConnectString", c(x = "SQLiteConn"),function(x){return(paste0(x@binary, " ",x@db_path))})
+setGeneric("SQLiteConnect", function(file_path, ...){standardGeneric("SQLiteConnect")})
+setMethod(f = "SQLiteConnect",
+          signature = "SQLiteConn",
+          definition = function(file_path, ...){
+            obj <- SQLConnect(path = file_path, ...)
+            }
+          )
 
-SQLConnect <- function(path){
+SQLConnect <- function(path, binary = .sqlite_bin){
 
-  new_obj <- new(Class = "SQLiteConn", db_path = path)
-
+  new_obj <- new(Class = "SQLiteConn", db_path = path, binary = .sqlite_bin)
+  new_obj@conn_string <- paste0(new_obj@binary, " ",new_obj@db_path)
+  new_obj@tables <- list()
+  new_obj@fields <- list()
   return(new_obj)
 }
