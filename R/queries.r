@@ -37,7 +37,30 @@ chk_tbl_exists <- function(conn, tbl){
 
 chk_tbl_headers <- function(conn, tbl){
 
-  qry <- "SELECT * FROM tbl LIMIT 0;"
+  cmd <- paste0(conn@conn_string, " ","\"PRAGMA table_info(", tbl,")\"", ";")
+
+  res <- system(command = cmd, intern = T)
+  res <- strsplit(x = res, split = "\\|")
+  res <- rapply(res, function(x) x[2])
+
+  return(res)
+
+}
+
+chk_tbls <- function(conn){
+
+  cmd <- paste0(conn@conn_string, " ", ".tables", ";")
+
+  res <- system(command = cmd, intern = T)
+  res <- strsplit(x = res, split = "\\s+")
+  res <- rapply(res, function(x) x)
+
+  names_res <- res
+
+  res <- as.list(res)
+  names(res) <- names_res
+
+  return(res)
 
 }
 
