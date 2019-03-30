@@ -9,13 +9,32 @@ setClass("SQLiteConn",
          prototype = list(binary = .sqlite_bin)
 )
 
-# setGeneric("SQLiteConnect", function(file_path, ...){standardGeneric("SQLiteConnect")})
-# setMethod(f = "SQLiteConnect",
-#           signature = "SQLiteConnection",
-#           definition = function(file_path, ...){
-#             obj <- SQLConnect(path = file_path, ...)
-#             }
-#           )
+setGeneric("IsValidSQLiteConnection", function(ConnObj){standardGeneric("IsValidSQLiteConnection")})
+setMethod(f = "IsValidSQLiteConnection",
+         signature = "SQLiteConn",
+         definition = function(ConnObj){
+           output <- list(valid_object = validObject(ConnObj),
+                          isS4_object = isS4(ConnObj),
+                          names_slots = "")
+           # Add further checks to ensure integrity of the connection object.
+
+            }
+         )
+
+setGeneric("UpdateSQLiteConnection", function(ConnObj, ...){standardGeneric("UpdateSQLiteConnection")})
+setMethod(f = "UpdateSQLiteConnection",
+         signature = "SQLiteConn",
+         definition = function(ConnObj, ...){
+            argts <- list(...)
+            if(hasArg(db_path)) ConnObj@db_path <- argts$db_path
+            if(hasArg(binary)) ConnObj@binary <- argts$binary
+            ConnObj@tables <- chk_tbls(ConnObj)
+            ConnObj@fields <- lapply(ConnObj@tables, chk_tbl_headers, conn = ConnObj)
+
+            return(ConnObj)
+
+            }
+         )
 
 SQLConnect <- function(path, binary = .sqlite_bin){
 
