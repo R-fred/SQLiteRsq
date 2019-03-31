@@ -37,7 +37,7 @@ chk_tbl_exists <- function(conn, tbl){
 
 chk_tbl_headers <- function(conn, tbl){
 
-  cmd <- paste0(conn@conn_string, " ","\"PRAGMA table_info(", tbl,")\"", ";")
+  cmd <- paste0(conn@conn_string, " ","\"PRAGMA table_info(", tbl,")\"")
 
   res <- system(command = cmd, intern = T)
   res <- strsplit(x = res, split = "\\|")

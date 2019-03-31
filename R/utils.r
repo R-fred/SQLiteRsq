@@ -39,7 +39,7 @@ get_sqlite_cli_binary <- function(use_sys_exe = TRUE){
 
   }
 
-  slash <- if (!is.null(this_pkg)) {"/"} else {NULL}
+  slash <- if (length(this_pkg) > 0) {"/"} else {NULL}
 
   path <- paste0(this_pkg, slash, "bin/", os, "/", binary_exe)
 

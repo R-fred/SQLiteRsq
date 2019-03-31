@@ -32,11 +32,31 @@ setMethod(f = "UpdateSQLiteConnection",
             }
          )
 
+setGeneric("DeleteSQLiteConnection", function(ConnObj){standardGeneric("DeleteSQLiteConnection")})
+setMethod(f = "DeleteSQLiteConnection",
+          signature = "SQLiteConn",
+          definition = function(ConnObj){
+            en <- parent.env(env = environment())
+            eval(parse(text = paste0("rm(\"", deparse(substitute(ConnObj)), "\"", ", envir = ", quote(en), ")")))
+            #rm(eval(quote(ConnObj)), envir = parent.frame())
+            cat(paste0("Removed connection object: ", deparse(substitute(ConnObj))))
+          })
+
+setGeneric("RecoverLastSQLiteConnection", function(ConnObj = .last_sqlite_conn){standardGeneric("RecoverLastSQLiteConnection")})
+setMethod(f = "RecoverLastSQLiteConnection",
+          signature = "SQLiteConn",
+          definition = function(ConnObj = .last_sqlite_conn){
+            return(ConnObj)
+          })
+
 SQLConnect <- function(path, binary = .sqlite_bin){
 
   new_obj <- new(Class = "SQLiteConn", db_path = path, binary = .sqlite_bin)
   new_obj@conn_string <- paste0(new_obj@binary, " ",new_obj@db_path)
   new_obj@tables <- chk_tbls(new_obj)
   new_obj@fields <- lapply(new_obj@tables, chk_tbl_headers, conn = new_obj)
+
+  .last_sqlite_conn <- new_obj
+
   return(new_obj)
 }
