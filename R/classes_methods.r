@@ -13,12 +13,8 @@ setGeneric("IsValidSQLiteConnection", function(ConnObj){standardGeneric("IsValid
 setMethod(f = "IsValidSQLiteConnection",
          signature = "SQLiteConn",
          definition = function(ConnObj){
-           output <- list(valid_object = validObject(ConnObj),
-                          isS4_object = isS4(ConnObj),
-                          names_slots = "")
-           # Add further checks to ensure integrity of the connection object.
-
-            }
+          validObject(ConnObj)
+             }
          )
 
 setGeneric("UpdateSQLiteConnection", function(ConnObj, ...){standardGeneric("UpdateSQLiteConnection")})

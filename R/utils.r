@@ -3,7 +3,7 @@
 get_os <-  function(){
 
   info <- capture.output(sessionInfo())
-  os <- info[2]
+  os <- info[3]
 
   if (grepl(pattern = "linux", x = os, ignore.case = T)) {
     return("linux")
@@ -39,7 +39,9 @@ get_sqlite_cli_binary <- function(use_sys_exe = TRUE){
 
   }
 
-  path <- paste0(this_pkg, "/bin/", os, "/", binary_exe)
+  slash <- if (!is.null(this_pkg)) {"/"} else {NULL}
+
+  path <- paste0(this_pkg, slash, "bin/", os, "/", binary_exe)
 
   return(path)
 

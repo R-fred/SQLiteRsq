@@ -49,7 +49,7 @@ chk_tbl_headers <- function(conn, tbl){
 
 chk_tbls <- function(conn){
 
-  cmd <- paste0(conn@conn_string, " ", ".tables", ";")
+  cmd <- paste0(conn@conn_string, " ", ".tables")
 
   res <- system(command = cmd, intern = T)
   res <- strsplit(x = res, split = "\\s+")
