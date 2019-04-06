@@ -13,26 +13,20 @@ setValidity("SQLiteConn", function(object) {
   if (length(object@binary) != 1) {
     "Slot @binary should be a character vector of length 1."
     #return(FALSE)
-  }
-  if (object@binary == "") {
+  } else if (object@binary == "") {
     "Slot @binary cannot contain an empty string."
-  }
-  if (file.exists(object@binary) == FALSE) {
+  } else if (file.exists(object@binary) == FALSE) {
     "SQLite binary not found. Check the path of your sqlite binary."
     #return(FALSE)
-  }
-  if (length(object@db_path) != 1) {
+  } else if (length(object@db_path) != 1) {
     "Slot @binary should be a character vector of length 1."
     #return(FALSE)
-  }
-  if (object@db_path == "") {
+  } else if (object@db_path == "") {
     "Slot @db_path cannot contain an empty string."
-  }
-  if (file.exists(object@db_path) == FALSE) {
+  } else if (file.exists(object@db_path) == FALSE) {
     "Database file not found. Check the path of your database file."
     #return(FALSE)
-  }
-  if (length(object@binary) == 1 & length(object@binary) == 1 & file.exists(object@binary) & file.exists(object@db_path)) {
+  } else if (length(object@binary) == 1 & length(object@binary) == 1 & file.exists(object@binary) & file.exists(object@db_path)) {
     return(TRUE)
   }
 })
