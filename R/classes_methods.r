@@ -26,9 +26,26 @@ setValidity("SQLiteConn", function(object) {
   } else if (file.exists(object@db_path) == FALSE) {
     "Database file not found. Check the path of your database file."
     #return(FALSE)
+  } else if (grepl(pattern = object@db_path, x = object@conn_string) == FALSE) {
+    "Invalid connection string. Check that the value of the slot @db_path is contained in the @conn_string slot."
   } else if (length(object@binary) == 1 & length(object@binary) == 1 & file.exists(object@binary) & file.exists(object@db_path)) {
     return(TRUE)
   }
+})
+
+setGeneric("ExecuteStatement", function(ConnObj, qry){standardGeneric("ExecuteStatement")})
+setMethod(f = "ExecuteStatement", signature = "SQLiteConn", definition = function(ConnObj, qry){
+
+  isValid <- IsValidSQLiteConnection(ConnObj = ConnObj)
+
+  if (!isTRUE(isValid)) stop("Invalid connection object.\nStopping now.")
+
+  cmd <- sprintf("%s %s", ConnObj@conn_string, qry)
+
+  output <- system(command = cmd, intern = T)
+
+  return(output)
+
 })
 
 setGeneric("IsValidSQLiteConnection", function(ConnObj){standardGeneric("IsValidSQLiteConnection")})

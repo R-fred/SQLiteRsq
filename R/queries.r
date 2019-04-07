@@ -1,17 +1,4 @@
 # Main functions ----
-execute_query <- function(sqlite_conn, option = NULL, db_path, query, append){
-
-  cmd <- paste0(sqlite_conn@binary, " '", sqlite_conn@db_path, "' ", "'", option, "' ", "'", query, "'")
-  output <- system(command = cmd, intern = T)
-
-  return(output)
-
-  # append: add only new records to the database.
-  # Either implement in SQL code, or check before in R.
-  # Dynamic choice? i.e. from a certain number of rows, what is the fastest option?
-
-
-}
 
 create_query <- function(qry_type, table, object, values){
 
@@ -31,7 +18,12 @@ create_query <- function(qry_type, table, object, values){
 
 chk_tbl_exists <- function(conn, tbl){
 
-  qry <- sprintf("")
+# OBSOLTE NOW THAT THE TABLES ARE +
+
+  qry <- sprintf("SELECT name FROM sqlite_master WHERE type='table' AND name='%s';", tbl)
+
+
+
 
 }
 
@@ -73,6 +65,9 @@ qry_insert <- function(tbl, type = c("values", "select", "default"), values){
   qry_vals <- values
 
   qry <- "\"INSERT INTO tbl VALUES('ID1', 'value1', 'value2')\";"
+
+  # Several inserts in a row can be done by separating the INSERT statements with a space.
+  # Count the number of records before and an after insertion. Can be done by using "SELECT COUNT(ROWID) FROM tbl;"
 
 }
 
