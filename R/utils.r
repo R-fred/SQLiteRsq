@@ -48,6 +48,12 @@ get_sqlite_cli_binary <- function(use_sys_exe = TRUE){
 }
 
 # BACKUP ----
-db_backup <- function(){
+db_backup <- function(conn, location = getwd(), ...){
+
+  bkp_path <- paste0(location, "/", basename(conn@db_path), ".bak")
+
+  cat(paste0("Database backed up at: ", bkp_path))
+
+  file.copy(from = conn@db_path, to = bkp_path, ...)
 
 }
