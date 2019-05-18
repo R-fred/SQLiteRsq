@@ -10,6 +10,7 @@ setClass("SQLiteConn",
 )
 
 setValidity("SQLiteConn", function(object) {
+
   if (length(object@binary) != 1) {
     "Slot @binary should be a character vector of length 1."
     #return(FALSE)
@@ -78,14 +79,42 @@ setMethod(f = "RecoverLastSQLiteConnection", signature = "SQLiteConn", definitio
             return(ConnObj)
           })
 
+setMethod ("initialize", signature  = "SQLiteConn",
+           definition = function (.Object,
+                                  db_path,
+                                  binary = .sqlite_bin,
+                                  conn_string = paste0(binary, " ",db_path)) {
+             .Object@binary <- .sqlite_bin
+             .Object@db_path <- db_path
+             .Object@conn_string <- conn_string
+             .Object@tables <- chk_tbls(.Object)
+             .Object@fields <- lapply(.Object@tables, chk_tbl_headers, conn = .Object)
+             return (.Object)
+           })
+
+setMethod("show", signature = "SQLiteConn",
+                             definition = function(object){
+                               msg <- paste0("\n--- SQLite connection ---------------------------\n",
+                                             "\nBinary: ", object@binary,
+                                             "\nDatabase path: ", object@db_path,
+                                             "\nConnection string: ", object@conn_string, "\n",
+                                             "\n--- Specifics ------------------------------------\n",
+                                             "\nNumber of tables: ", length(object@tables),
+                                             "\nTables (with column names): \n"
+                                             )
+                               cat(msg)
+                               print(x = object@fields)
+
+                             })
+
 NewSQLiteConnection <- function(path, binary = .sqlite_bin){
 
   new_obj <- new(Class = "SQLiteConn", db_path = path, binary = .sqlite_bin)
-  new_obj@conn_string <- paste0(new_obj@binary, " ",new_obj@db_path)
-  new_obj@tables <- chk_tbls(new_obj)
-  new_obj@fields <- lapply(new_obj@tables, chk_tbl_headers, conn = new_obj)
 
   .last_sqlite_conn <- new_obj
+
+  cat("\nCreated following database connection:\n")
+  show(new_obj)
 
   return(new_obj)
 }

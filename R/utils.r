@@ -47,6 +47,13 @@ get_sqlite_cli_binary <- function(use_sys_exe = TRUE){
 
 }
 
+exists2 <- function(object){
+
+  if (!is.character(object)) stop("\nObject should be of type character.\n")
+
+  object %in% ls(all.names = T, envir = parent.frame())
+}
+
 # BACKUP ----
 
 setGeneric("BackUpDB", function(ConnObj, ...){standardGeneric("BackUpDB")})
