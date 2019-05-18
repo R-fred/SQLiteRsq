@@ -54,8 +54,7 @@ setMethod(f = "IsValidSQLiteConnection", signature = "SQLiteConn", definition = 
              })
 
 setGeneric("UpdateSQLiteConnection", function(ConnObj, ...){standardGeneric("UpdateSQLiteConnection")})
-setMethod(f = "UpdateSQLiteConnection", signature = "SQLiteConn",
-         definition = function(ConnObj, ...){
+setMethod(f = "UpdateSQLiteConnection", signature = "SQLiteConn", definition = function(ConnObj, ...){
             argts <- list(...)
             if(hasArg(db_path)) ConnObj@db_path <- argts$db_path
             if(hasArg(binary)) ConnObj@binary <- argts$binary
@@ -67,8 +66,7 @@ setMethod(f = "UpdateSQLiteConnection", signature = "SQLiteConn",
             })
 
 setGeneric("DeleteSQLiteConnection", function(ConnObj){standardGeneric("DeleteSQLiteConnection")})
-setMethod(f = "DeleteSQLiteConnection", signature = "SQLiteConn",
-          definition = function(ConnObj){
+setMethod(f = "DeleteSQLiteConnection", signature = "SQLiteConn", definition = function(ConnObj){
             en <- parent.env(env = environment())
             eval(parse(text = paste0("rm(\"", deparse(substitute(ConnObj)), "\"", ", envir = ", quote(en), ")")))
             #rm(eval(quote(ConnObj)), envir = parent.frame())
@@ -76,12 +74,11 @@ setMethod(f = "DeleteSQLiteConnection", signature = "SQLiteConn",
           })
 
 setGeneric("RecoverLastSQLiteConnection", function(ConnObj = .last_sqlite_conn){standardGeneric("RecoverLastSQLiteConnection")})
-setMethod(f = "RecoverLastSQLiteConnection", signature = "SQLiteConn",
-          definition = function(ConnObj = .last_sqlite_conn){
+setMethod(f = "RecoverLastSQLiteConnection", signature = "SQLiteConn", definition = function(ConnObj = .last_sqlite_conn){
             return(ConnObj)
           })
 
-SQLConnect <- function(path, binary = .sqlite_bin){
+NewSQLiteConnection <- function(path, binary = .sqlite_bin){
 
   new_obj <- new(Class = "SQLiteConn", db_path = path, binary = .sqlite_bin)
   new_obj@conn_string <- paste0(new_obj@binary, " ",new_obj@db_path)
