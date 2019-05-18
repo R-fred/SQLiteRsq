@@ -27,6 +27,10 @@ chk_tbl_exists <- function(conn, tbl){
 
 }
 
+#' chk_tbl_headers
+#'
+#' @name chk_tbl_headers
+#'
 chk_tbl_headers <- function(conn, tbl){
 
   cmd <- paste0(conn@conn_string, " ","\"PRAGMA table_info(", tbl,")\"")
@@ -39,6 +43,10 @@ chk_tbl_headers <- function(conn, tbl){
 
 }
 
+#' chk_tbls
+#'
+#' @name chk_tbls
+#'
 chk_tbls <- function(conn){
 
   cmd <- paste0(conn@conn_string, " ", ".tables")
