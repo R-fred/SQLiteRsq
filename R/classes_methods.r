@@ -1,4 +1,6 @@
 # Class also provides info about tables and fields.
+#
+# Methods to create the objects ----
 setClass("SQLiteConn",
          slots = list(binary = "character",
                       db_path = "character",
@@ -33,6 +35,48 @@ setValidity("SQLiteConn", function(object) {
     return(TRUE)
   }
 })
+
+setMethod ("initialize", signature  = "SQLiteConn",
+           definition = function (.Object,
+                                  db_path,
+                                  binary = .sqlite_bin,
+                                  conn_string = paste0(binary, " ",db_path)) {
+             .Object@binary <- .sqlite_bin
+             .Object@db_path <- db_path
+             .Object@conn_string <- conn_string
+             .Object@tables <- chk_tbls(.Object)
+             .Object@fields <- lapply(.Object@tables, chk_tbl_headers, conn = .Object)
+             return (.Object)
+           })
+
+setMethod("show", signature = "SQLiteConn",
+          definition = function(object){
+            msg <- paste0("\n--- SQLite connection ---------------------------\n",
+                          "\nBinary: ", object@binary,
+                          "\nDatabase path: ", object@db_path,
+                          "\nConnection string: ", object@conn_string, "\n",
+                          "\n--- Specifics ------------------------------------\n",
+                          "\nNumber of tables: ", length(object@tables),
+                          "\nTables (with column names): \n"
+            )
+            cat(msg)
+            print(x = object@fields)
+
+          })
+
+NewSQLiteConnection <- function(path, binary = .sqlite_bin){
+
+  new_obj <- new(Class = "SQLiteConn", db_path = path, binary = .sqlite_bin)
+
+  .last_sqlite_conn <- new_obj
+
+  cat("\nCreated following database connection:\n")
+  show(new_obj)
+
+  return(new_obj)
+}
+
+# Methods to work with objects ----
 
 setGeneric("ExecuteStatement", function(ConnObj, qry){standardGeneric("ExecuteStatement")})
 setMethod(f = "ExecuteStatement", signature = "SQLiteConn", definition = function(ConnObj, qry){
@@ -78,43 +122,3 @@ setGeneric("RecoverLastSQLiteConnection", function(ConnObj = .last_sqlite_conn){
 setMethod(f = "RecoverLastSQLiteConnection", signature = "SQLiteConn", definition = function(ConnObj = .last_sqlite_conn){
             return(ConnObj)
           })
-
-setMethod ("initialize", signature  = "SQLiteConn",
-           definition = function (.Object,
-                                  db_path,
-                                  binary = .sqlite_bin,
-                                  conn_string = paste0(binary, " ",db_path)) {
-             .Object@binary <- .sqlite_bin
-             .Object@db_path <- db_path
-             .Object@conn_string <- conn_string
-             .Object@tables <- chk_tbls(.Object)
-             .Object@fields <- lapply(.Object@tables, chk_tbl_headers, conn = .Object)
-             return (.Object)
-           })
-
-setMethod("show", signature = "SQLiteConn",
-                             definition = function(object){
-                               msg <- paste0("\n--- SQLite connection ---------------------------\n",
-                                             "\nBinary: ", object@binary,
-                                             "\nDatabase path: ", object@db_path,
-                                             "\nConnection string: ", object@conn_string, "\n",
-                                             "\n--- Specifics ------------------------------------\n",
-                                             "\nNumber of tables: ", length(object@tables),
-                                             "\nTables (with column names): \n"
-                                             )
-                               cat(msg)
-                               print(x = object@fields)
-
-                             })
-
-NewSQLiteConnection <- function(path, binary = .sqlite_bin){
-
-  new_obj <- new(Class = "SQLiteConn", db_path = path, binary = .sqlite_bin)
-
-  .last_sqlite_conn <- new_obj
-
-  cat("\nCreated following database connection:\n")
-  show(new_obj)
-
-  return(new_obj)
-}
