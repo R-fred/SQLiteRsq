@@ -78,16 +78,36 @@ NewSQLiteConnection <- function(path, binary = .sqlite_bin){
 
 # Methods to work with objects ----
 
+setGeneric("GetQueryResults", function(ConnObj, qry){standardGeneric("GetQueryResults")})
+setMethod(f = "GetQueryResults", signature = "SQLiteConn", definition = function(ConnObj, qry){
+
+  res <- ExecuteStatement(ConnObj = ConnObj, qry = qry)
+
+  if (length(res = 0)) output <- NULL
+  if (length(res > 1))
+
+  return(output)
+
+})
+
 setGeneric("ExecuteStatement", function(ConnObj, qry){standardGeneric("ExecuteStatement")})
 setMethod(f = "ExecuteStatement", signature = "SQLiteConn", definition = function(ConnObj, qry){
+
+  # THOUGHTS:
+  # COUNT(*) statement can be done with .headers off. Otherwise COUNT(*) is returned as header.
+  # .headers on should be used at all times except for COUNT(*) in order to allow for JOINS.
 
   isValid <- IsValidSQLiteConnection(ConnObj = ConnObj)
 
   if (!isTRUE(isValid)) stop("Invalid connection object.\nStopping now.")
 
+  if (!grepl("'.*'", qry, perl = T)) qry <- paste0("'", qry, "'")
+
   cmd <- sprintf("%s %s", ConnObj@conn_string, qry)
 
   output <- system(command = cmd, intern = T)
+
+  # if (grepl("COUNT(.*)", qry)) output <- as.numeric(output)
 
   return(output)
 
