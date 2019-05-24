@@ -6,6 +6,7 @@ test_that("Create a new db with a table", {
     file.remove("tests/testthat/test_create_db.sqlite")
     }
   system(command = paste0(obj@binary, " ", "tests/testthat/test_create_db.sqlite", " 'CREATE TABLE tbl(id, col1, col2);'"), intern = T)
+  system(command = paste0(obj@binary, " ", "tests/testthat/test_create_db.sqlite", " 'INSERT INTO tbl VALUES(\"r1c1\", \"r1c2\", \"r1c3\");'", , " 'INSERT INTO tbl VALUES(\"r2c1\", \"r2c2\", \"r2c3\");'", , " 'INSERT INTO tbl VALUES(\"r3c1\", \"r3c2\", \"r3c3\");'"), intern = T)
 
   expect_true(file.exists("tests/testthat/test_create_db.sqlite"))
 

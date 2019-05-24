@@ -11,4 +11,5 @@ test_that("Create class", {
   expect_equal(obj@path = "tests/testthat/test_create_db.sqlite")
   expect_true(is.character(obj@binary))
   expect_true(is.character(obj@db_path))
+
 })
