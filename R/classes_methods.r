@@ -78,17 +78,59 @@ NewSQLiteConnection <- function(path, binary = .sqlite_bin){
 
 # Methods to work with objects ----
 
-setGeneric("GetQueryResults", function(ConnObj, qry){standardGeneric("GetQueryResults")})
-setMethod(f = "GetQueryResults", signature = "SQLiteConn", definition = function(ConnObj, qry){
+setGeneric("GetQueryResults", function(ConnObj, qry, dataTable = F){standardGeneric("GetQueryResults")})
+setMethod(f = "GetQueryResults", signature = "SQLiteConn", definition = function(ConnObj, qry, dataTable = F){
 
   res <- ExecuteStatement(ConnObj = ConnObj, qry = qry)
 
-  if (length(res = 0)) output <- NULL
-  if (length(res > 1))
+  if (length(res == 0)) output <- NULL
+  if (length(res >= 1)) {
+
+    output <- lapply(res, strsplit, split = "\\|") # Results are returned separated by '|'
+
+    output <- unlist(output, recursive = F) # List is two levels with headers on.
+    output <- lapply(output, function(x) as.data.frame(t(as.list(x))))
+
+    output <- data.table::rbindlist(output)
+    names(output) <- as.character(unlist(output[1,])) # headers are in the first row.
+    output <- output[-1,]
+
+    if (isTRUE(dataTable)) {
+      output <- data.table::as.data.table(output)
+    }
+
+
+  }
 
   return(output)
 
 })
+
+setGeneric("InsertData", function(ConnObj, data){standardGeneric("InsertData")})
+setMethod(f = "InsertData", signature = "SQLiteConn", definition = function(ConnObj, data){
+
+  # Get data and check if it is a vector, data frame, list, etc...
+  # Check the number of columns
+  # Check that the number of values to insert are equal to the number of columns
+  # No value for a column: add NULL. NA -> NULL
+  #
+  # Data frames rows should be converted to character vector of length 1.
+  # TODO(): Create a supporting function to convert data.frames to character vectors
+  # How to make an efficient version of this function (with data.table?):
+  # for (ii in 1:nrow(results_test)) {
+  #     print(as.character(unlist(results_test[ii])))
+  # }
+  #
+  # Here is the solution: results_test[, sql := paste(unlist(.SD), collapse = ", ")]
+  #
+  #
+  # Use transactions: BEGIN TRANSACTION; COMMIT;
+  # Example: sqlite3 tests/testthat/test_create_db.sqlite 'BEGIN TRANSACTION;' 'INSERTINTO tbl VALUES("r4c1", "r4c2", "r4c3");' 'INSERT INTO tbl VALUES("r5c1", "r5c2", "r5c3");' 'INSERT INTO tbl VALUES("r6c1", NULL, "r6c3");' 'COMMIT;'
+
+
+
+})
+
 
 setGeneric("ExecuteStatement", function(ConnObj, qry){standardGeneric("ExecuteStatement")})
 setMethod(f = "ExecuteStatement", signature = "SQLiteConn", definition = function(ConnObj, qry){
@@ -96,6 +138,7 @@ setMethod(f = "ExecuteStatement", signature = "SQLiteConn", definition = functio
   # THOUGHTS:
   # COUNT(*) statement can be done with .headers off. Otherwise COUNT(*) is returned as header.
   # .headers on should be used at all times except for COUNT(*) in order to allow for JOINS.
+  # Use 'AS n_row' to get a proper header for COUNT(*).
 
   isValid <- IsValidSQLiteConnection(ConnObj = ConnObj)
 
@@ -103,7 +146,7 @@ setMethod(f = "ExecuteStatement", signature = "SQLiteConn", definition = functio
 
   if (!grepl("'.*'", qry, perl = T)) qry <- paste0("'", qry, "'")
 
-  cmd <- sprintf("%s %s", ConnObj@conn_string, qry)
+  cmd <- sprintf("%s '.headers on' %s", ConnObj@conn_string, qry)
 
   output <- system(command = cmd, intern = T)
 
