@@ -1,2 +1,2 @@
-Last update: 2019.03.17
-SQLite version: 3.27.2 (3270200)
+Last update: 2019.05.27
+SQLite version: 3.28.0 (3280000)
