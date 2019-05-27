@@ -111,6 +111,7 @@ setMethod(f = "InsertData", signature = "SQLiteConn", definition = function(Conn
 
   # Get data and check if it is a vector, data frame, list, etc...
   # Check the number of columns if a data frame.
+  # check that the names of the data columns are the same and in the same order as in the DB table.
   # Check that the number of values to insert are equal to the number of columns in the dataset.
   # If not, either:
   # - No value for a column: add NULL. NA -> NULL
@@ -124,7 +125,12 @@ setMethod(f = "InsertData", signature = "SQLiteConn", definition = function(Conn
   #     print(as.character(unlist(results_test[ii])))
   # }
   #
-  # Here is the solution (with data.table): results_test[, sql := paste(unlist(.SD), collapse = ", ")]
+  # Here is the solution:
+  #   - with data.table: results_test[, sql := paste(unlist(.SD), collapse = ", ")]
+  #   - with base R:
+  #         cols <- c("b", "c", "d") # column names.
+  #         data$x <- do.call(paste, c(data[cols], sep=","))
+  #         for (co in cols) data[co] <- NULL # if want to get rid of columns.
   #
   #
   # Use transactions: BEGIN TRANSACTION; COMMIT;
