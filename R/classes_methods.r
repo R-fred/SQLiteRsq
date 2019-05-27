@@ -110,9 +110,12 @@ setGeneric("InsertData", function(ConnObj, data){standardGeneric("InsertData")})
 setMethod(f = "InsertData", signature = "SQLiteConn", definition = function(ConnObj, data){
 
   # Get data and check if it is a vector, data frame, list, etc...
-  # Check the number of columns
-  # Check that the number of values to insert are equal to the number of columns
-  # No value for a column: add NULL. NA -> NULL
+  # Check the number of columns if a data frame.
+  # Check that the number of values to insert are equal to the number of columns in the dataset.
+  # If not, either:
+  # - No value for a column: add NULL. NA -> NULL
+  # - No value add name to the INSERT STATEMENT.
+  #   Query becomes: INSERT INTO table (col1, col2, ...) VALUES (val1, val2, ...)
   #
   # Data frames rows should be converted to character vector of length 1.
   # TODO(): Create a supporting function to convert data.frames to character vectors
@@ -121,7 +124,7 @@ setMethod(f = "InsertData", signature = "SQLiteConn", definition = function(Conn
   #     print(as.character(unlist(results_test[ii])))
   # }
   #
-  # Here is the solution: results_test[, sql := paste(unlist(.SD), collapse = ", ")]
+  # Here is the solution (with data.table): results_test[, sql := paste(unlist(.SD), collapse = ", ")]
   #
   #
   # Use transactions: BEGIN TRANSACTION; COMMIT;

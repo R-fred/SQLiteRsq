@@ -54,6 +54,12 @@ exists2 <- function(object){
   object %in% ls(all.names = T, envir = parent.frame())
 }
 
+clean_col_headers <- function(col_names){
+  # Function to clean up column names.
+  # Generates db friendly column names.
+  # e.g. changes '.', '-', ' ' into '_'; removes ':', ';', ',', '|', '>', '<', '=', etc...
+}
+
 # BACKUP ----
 
 setGeneric("BackUpDB", function(ConnObj, ...){standardGeneric("BackUpDB")})
