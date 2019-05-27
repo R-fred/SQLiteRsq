@@ -47,6 +47,19 @@ get_sqlite_cli_binary <- function(use_sys_exe = TRUE){
 
 }
 
+exists2 <- function(object){
+
+  if (!is.character(object)) stop("\nObject should be of type character.\n")
+
+  object %in% ls(all.names = T, envir = parent.frame())
+}
+
+clean_col_headers <- function(col_names){
+  # Function to clean up column names.
+  # Generates db friendly column names.
+  # e.g. changes '.', '-', ' ' into '_'; removes ':', ';', ',', '|', '>', '<', '=', etc...
+}
+
 # BACKUP ----
 
 setGeneric("BackUpDB", function(ConnObj, ...){standardGeneric("BackUpDB")})

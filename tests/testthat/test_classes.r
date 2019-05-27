@@ -6,8 +6,10 @@ test_that("Create class", {
 })
 
 test_that("Create class", {
-  obj <- SQLConnect(path = "tests/testthat/test_create_db.sqlite")
+  obj <- NewSQLiteConnection(path = "tests/testthat/test_create_db.sqlite")
   expect_equal(object = class(obj)[[1]], expected = "SQLiteConn")
+  expect_equal(obj@path = "tests/testthat/test_create_db.sqlite")
   expect_true(is.character(obj@binary))
   expect_true(is.character(obj@db_path))
+
 })
