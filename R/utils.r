@@ -60,6 +60,40 @@ clean_col_headers <- function(col_names){
   # e.g. changes '.', '-', ' ' into '_'; removes ':', ';', ',', '|', '>', '<', '=', etc...
 }
 
+# CONVERT DATA FRAMES TO CHARACTER VECTORS ----
+
+convert_dt_to_input_string <- function(data){
+
+  data <- data.table::as.data.table(data) #ensure that the data is a data.table.
+
+  data[, sql := paste(unlist(.SD), collapse = ", ")] # create sql string for each row.
+
+  output <- paste(data[, sql], sep = "", collapse = ", ")
+
+  # INSERT ' and complete VALUES(...) part of the insert string.
+  # adding the table needs to be handled later since the job here is only to convert to character vector.
+  # paste0("VALUES('", stringr::str_replace_all(results_test$sql, pattern = ", ", replacement = "', '"), "')")
+
+
+  return(output)
+
+}
+
+# TODO(): Create a supporting function to convert data.frames to character vectors
+# How to make an efficient version of this function (with data.table?):
+# for (ii in 1:nrow(results_test)) {
+#     print(as.character(unlist(results_test[ii])))
+# }
+#
+# Here is the solution:
+#   - with data.table: results_test[, sql := paste(unlist(.SD), collapse = ", ")]
+#   - with base R:
+#         cols <- c("b", "c", "d") # column names.
+#         data$x <- do.call(paste, c(data[cols], sep=","))
+#         for (co in cols) data[co] <- NULL # if want to get rid of columns.
+#
+#
+
 # BACKUP ----
 
 setGeneric("BackUpDB", function(ConnObj, ...){standardGeneric("BackUpDB")})

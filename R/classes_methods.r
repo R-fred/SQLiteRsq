@@ -119,20 +119,6 @@ setMethod(f = "InsertData", signature = "SQLiteConn", definition = function(Conn
   #   Query becomes: INSERT INTO table (col1, col2, ...) VALUES (val1, val2, ...)
   #
   # Data frames rows should be converted to character vector of length 1.
-  # TODO(): Create a supporting function to convert data.frames to character vectors
-  # How to make an efficient version of this function (with data.table?):
-  # for (ii in 1:nrow(results_test)) {
-  #     print(as.character(unlist(results_test[ii])))
-  # }
-  #
-  # Here is the solution:
-  #   - with data.table: results_test[, sql := paste(unlist(.SD), collapse = ", ")]
-  #   - with base R:
-  #         cols <- c("b", "c", "d") # column names.
-  #         data$x <- do.call(paste, c(data[cols], sep=","))
-  #         for (co in cols) data[co] <- NULL # if want to get rid of columns.
-  #
-  #
   # Use transactions: BEGIN TRANSACTION; COMMIT;
   # Example: sqlite3 tests/testthat/test_create_db.sqlite 'BEGIN TRANSACTION;' 'INSERTINTO tbl VALUES("r4c1", "r4c2", "r4c3");' 'INSERT INTO tbl VALUES("r5c1", "r5c2", "r5c3");' 'INSERT INTO tbl VALUES("r6c1", NULL, "r6c3");' 'COMMIT;'
 
