@@ -21,3 +21,12 @@ test_that("Get sqlite cli. Windows", {
   expect_false(grepl(pattern = "/bin/windows/sqlite3.exe", x = sqlite_bin_os))
   expect_true(grepl(pattern = "/bin/windows/sqlite3.exe", x = sqlite_bin_pkg))
 })
+
+test_that("convert to input string", {
+  df <- data.frame()
+  character_vector <- character()
+  #first character function
+  #then df function.
+  #test with several df sizes (up to 1 million rows?)
+  "..."
+})
