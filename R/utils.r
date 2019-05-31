@@ -69,9 +69,10 @@ convert_dt_to_input_string <- function(data){
   data[, sql := paste(unlist(.SD), collapse = ", ")] # create sql string for each row.
 
   output <- paste(data[, sql], sep = "", collapse = ", ")
+  output <- paste0("VALUES('", gsub(x = data$sql, pattern = ", ", replacement = "', '"), "')")
 
   # INSERT ' and complete VALUES(...) part of the insert string.
-  # adding the table needs to be handled later since the job here is only to convert to character vector.
+  # adding the table to insert into needs to be handled later since the job here is only to convert to character vector.
   # paste0("VALUES('", stringr::str_replace_all(results_test$sql, pattern = ", ", replacement = "', '"), "')")
 
 
