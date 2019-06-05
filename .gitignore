@@ -5,3 +5,6 @@
 .header=on
 .header
 .headers
+.changes on
+.timer
+.stats
