@@ -66,7 +66,7 @@ convert_dt_to_input_string <- function(data){
 
   data <- data.table::as.data.table(data) #ensure that the data is a data.table.
 
-  data[, sql := paste(unlist(.SD), collapse = ", ")] # create sql string for each row.
+  data <- setDT(data)[, sql := Reduce(function(...) paste(..., sep = ", "), .SD), .SDcols = names(data)] # create sql string for each row.
 
   output <- convert_char_to_input_string(data[, sql])
 
@@ -78,27 +78,19 @@ convert_dt_to_input_string <- function(data){
 
 convert_char_to_input_string <- function(data){
 
-  output <- paste(data, sep = "", collapse = ", ")
-  output <- paste0("VALUES('", gsub(x = data, pattern = ", ", replacement = "', '"), "')")
+  if (sum(grepl(pattern = ", ", x = data)) == 0) {
+    output <- paste(data, sep = "", collapse = ", ")
+  } else {
+    output <- data
+  }
+
+  output <- paste0("VALUES('", gsub(x = output, pattern = ", ", replacement = "', '"), "')")
+
+  output <- gsub(pattern = "'NA'", replacement = "NULL", x = output)
 
   return(output)
 
 }
-
-# TODO(): Create a supporting function to convert data.frames to character vectors
-# How to make an efficient version of this function (with data.table?):
-# for (ii in 1:nrow(results_test)) {
-#     print(as.character(unlist(results_test[ii])))
-# }
-#
-# Here is the solution:
-#   - with data.table: results_test[, sql := paste(unlist(.SD), collapse = ", ")]
-#   - with base R:
-#         cols <- c("b", "c", "d") # column names.
-#         data$x <- do.call(paste, c(data[cols], sep=","))
-#         for (co in cols) data[co] <- NULL # if want to get rid of columns.
-#
-#
 
 # BACKUP ----
 

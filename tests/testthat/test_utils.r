@@ -23,9 +23,18 @@ test_that("Get sqlite cli. Windows", {
 })
 
 test_that("convert to input string", {
-  df <- data.frame()
-  character_vector <- character()
-  #first character function
+  library(data.table)
+  dt <- data.table(a = "id1", b = "col1", c = "col2")
+  dt2 <- data.table(a = c("id1", "id2"), b = c("col1", "col12"), c = c("col2", "col22"))
+  character_vector <- c("id1", "col1", "col2")
+
+  char_input <- convert_char_to_input_string(character_vector)
+  dt_input <- convert_dt_to_input_string(dt)
+  dt2_input <- convert_dt_to_input_string(dt2)
+
+  expect_equal(object = char_input, expected = "VALUES('id1', 'col1', 'col2')")
+  expect_equal(object = dt2_input, expected = c("VALUES('id1', 'col1', 'col2')", "VALUES('id2', 'col12', 'col22')"))
+    #first character function
   #then df function.
   #test with several df sizes (up to 1 million rows?)
   "..."
