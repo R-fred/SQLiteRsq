@@ -1,3 +1,7 @@
+# NOTES ----
+# The reading and writing of files is supported in the ubuntu version of sqlite3 cmd line.
+#
+
 # GENERAL ----
 
 get_os <-  function(){

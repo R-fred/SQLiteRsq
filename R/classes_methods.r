@@ -161,8 +161,10 @@ setMethod(f = "UpdateSQLiteConnection", signature = "SQLiteConn", definition = f
             argts <- list(...)
             if(hasArg(db_path)) ConnObj@db_path <- argts$db_path
             if(hasArg(binary)) ConnObj@binary <- argts$binary
-            ConnObj@tables <- chk_tbls(ConnObj)
-            ConnObj@fields <- lapply(ConnObj@tables, chk_tbl_headers, conn = ConnObj)
+            #ConnObj@tables <- chk_tbls(ConnObj) # not working -> find a way
+            #ConnObj@fields <- lapply(ConnObj@tables, chk_tbl_headers, conn = ConnObj) -> not working, find a way.
+            #Split the update in several steps?
+            ConnObj@conn_string <- paste0(ConnObj@binary, " ", ConnObj@db_path)
 
             return(ConnObj)
 
