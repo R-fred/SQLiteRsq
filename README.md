@@ -1,4 +1,4 @@
-# SQLiteRsq
+# resqlite
 Alternative sqlite interface for R.
 
 Project plan:
