@@ -5,10 +5,13 @@ setClass("SQLiteConn",
          slots = list(binary = "character",
                       db_path = "character",
                       conn_string = "character",
+                      options = "list",
+                      pragma = "list",
                       tables = "list",
                       fields = "list"
                       ),
-         prototype = list(binary = .sqlite_bin)
+         prototype = list(binary = .sqlite_bin,
+                          options = list(headers = "on"))
 )
 
 setValidity("SQLiteConn", function(object) {
@@ -182,3 +185,12 @@ setGeneric("RecoverLastSQLiteConnection", function(ConnObj = .last_sqlite_conn){
 setMethod(f = "RecoverLastSQLiteConnection", signature = "SQLiteConn", definition = function(ConnObj = .last_sqlite_conn){
             return(ConnObj)
           })
+
+setGeneric("InsertCSV", function(ConnObj, table_name){standardGeneric("InsertCSV")})
+setMethod(f = "InsertCSV", signature = "SQLiteConn", definition = function(ConnObj, table_name){
+  # Need to check for correct table names.
+  # Have options to check only number of columns?
+  # Have option to choose the columns to import?
+  #
+  #sqlite3 'tests/testthat/test_create_db.sqlite' '.mode csv' '.import trial.csv tbl'
+})
