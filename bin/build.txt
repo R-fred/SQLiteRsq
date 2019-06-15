@@ -1,0 +1,7 @@
+Building sqlite:
+
+gcc -Os -I. -DSQLITE_THREADSAFE=0 -DSQLITE_ENABLE_FTS4 -DSQLITE_ENABLE_JSON1    -DSQLITE_ENABLE_RTREE -DSQLITE_ENABLE_EXPLAIN_COMMENTS    -DHAVE_USLEEP -DHAVE_READLINE    shell.c sqlite3.c -ldl -lreadline -lncurses -o sqlite3
+
+Building extensions:
+
+gcc -g -fPIC -shared shathree.c -o shathree.so
