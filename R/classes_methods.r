@@ -8,10 +8,14 @@ setClass("SQLiteConn",
                       options = "list",
                       pragma = "list",
                       tables = "list",
-                      fields = "list"
+                      fields = "list",
+                      sha3sum = "character" # Needs to be updated after each change in the database.
                       ),
          prototype = list(binary = .sqlite_bin,
-                          options = list(headers = "on"))
+                          options = list(headers = "on",
+                                         mode = "list"
+                                         )
+                          )
 )
 
 setValidity("SQLiteConn", function(object) {
@@ -39,24 +43,33 @@ setValidity("SQLiteConn", function(object) {
   }
 })
 
-setMethod ("initialize", signature  = "SQLiteConn",
-           definition = function (.Object,
+setMethod("initialize", signature  = "SQLiteConn",
+           definition = function(.Object,
                                   db_path,
                                   binary = .sqlite_bin,
-                                  conn_string = paste0(binary, " ",db_path)) {
-             .Object@binary <- .sqlite_bin
+                                  options = list(headers = "on",
+                                                 mode = "list")
+                                 ) {
+
+             opt_strg <- create_options_string(options)
+
+             .Object@binary <- binary
              .Object@db_path <- db_path
-             .Object@conn_string <- conn_string
+             .Object@conn_string <- paste0(.Object@binary, " ", .Object@db_path, " ", opt_strg)
              .Object@tables <- chk_tbls(.Object)
              .Object@fields <- lapply(.Object@tables, chk_tbl_headers, conn = .Object)
-             return (.Object)
+             .Object@sha3sum <- system(paste0(.Object@conn_string, " '.sha3sum'"), intern = T)[2]
+             return(.Object)
            })
 
 setMethod("show", signature = "SQLiteConn",
           definition = function(object){
             msg <- paste0("\n--- SQLite connection ---------------------------\n",
+                          "\nSHA3 sum: ", object@sha3sum,
                           "\nBinary: ", object@binary,
                           "\nDatabase path: ", object@db_path,
+                          "\nOptions: ", create_options_string(object@options),
+                          "\nPragmas: ", object@pragma,
                           "\nConnection string: ", object@conn_string, "\n",
                           "\n--- Specifics ------------------------------------\n",
                           "\nNumber of tables: ", length(object@tables),
@@ -78,6 +91,79 @@ NewSQLiteConnection <- function(path, binary = .sqlite_bin){
 
   return(new_obj)
 }
+
+# Accessors -----
+setGeneric("binary", function(ConnObj){standardGeneric("binary")})
+setMethod(f = "binary", signature = "SQLiteConn", definition = function(ConnObj){
+  ConnObj@binary
+})
+
+setGeneric("db_path", function(ConnObj){standardGeneric("db_path")})
+setMethod(f = "db_path", signature = "SQLiteConn", definition = function(ConnObj){
+  ConnObj@db_path
+})
+
+setGeneric("conn_string", function(ConnObj){standardGeneric("db_path")})
+setMethod(f = "conn_string", signature = "SQLiteConn", definition = function(ConnObj){
+  ConnObj@conn_string
+})
+
+setGeneric("options", function(ConnObj){standardGeneric("options")})
+setMethod(f = "options", signature = "SQLiteConn", definition = function(ConnObj){
+  ConnObj@options
+})
+
+setGeneric("pragma", function(ConnObj){standardGeneric("pragma")})
+setMethod(f = "pragma", signature = "SQLiteConn", definition = function(ConnObj){
+  ConnObj@pragma
+})
+
+setGeneric("tables", function(ConnObj){standardGeneric("tables")})
+setMethod(f = "tables", signature = "SQLiteConn", definition = function(ConnObj){
+  ConnObj@tables
+})
+
+setGeneric("fields", function(ConnObj){standardGeneric("fields")})
+setMethod(f = "fields", signature = "SQLiteConn", definition = function(ConnObj){
+  ConnObj@fields
+})
+
+setGeneric("sha3sum", function(ConnObj){standardGeneric("sha3sum")})
+setMethod(f = "sha3sum", signature = "SQLiteConn", definition = function(ConnObj){
+  ConnObj@sha3sum
+})
+
+
+# Setters ----
+setGeneric("binary<-", function(ConnObj, value){standardGeneric("binary<-")})
+setMethod(f = "binary<-", signature = "SQLiteConn", definition = function(ConnObj, value){
+
+  ConnObj@binary <- value
+  validObject(ConnObj)
+
+  ConnObj
+
+})
+
+setGeneric("db_path<-", function(ConnObj, value){standardGeneric("db_path<-")})
+setMethod(f = "db_path<-", signature = "SQLiteConn", definition = function(ConnObj, value){
+
+  ConnObj@db_path <- value
+  validObject(ConnObj)
+
+  ConnObj
+
+})
+
+setGeneric("sha3sum<-", function(ConnObj){standardGeneric("sha3sum<-")})
+setMethod(f = "sha3sum<-", signature = "SQLiteConn", definition = function(ConnObj){
+
+  ConnObj@sha3sum <- system(paste0(ConnObj@conn_string, " '.sha3sum'"), intern = T)[2]
+  validObject(ConnObj)
+
+  ConnObj
+
+})
 
 # Methods to work with objects ----
 
@@ -129,7 +215,6 @@ setMethod(f = "InsertData", signature = "SQLiteConn", definition = function(Conn
 
 })
 
-
 setGeneric("ExecuteStatement", function(ConnObj, qry){standardGeneric("ExecuteStatement")})
 setMethod(f = "ExecuteStatement", signature = "SQLiteConn", definition = function(ConnObj, qry){
 
@@ -144,7 +229,7 @@ setMethod(f = "ExecuteStatement", signature = "SQLiteConn", definition = functio
 
   if (!grepl("'.*'", qry, perl = T)) qry <- paste0("'", qry, "'")
 
-  cmd <- sprintf("%s '.headers on' %s", ConnObj@conn_string, qry)
+  cmd <- sprintf("%s '.headers on' %s", ConnObj@conn_string, qry) #TODO(): change '.headers on' with option string.
 
   output <- system(command = cmd, intern = T)
 

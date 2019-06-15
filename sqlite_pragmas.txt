@@ -1,0 +1,79 @@
+## List of pragmas ##
+EXCLUSIVE locking mode
+application_id
+auto_vacuum
+automatic_index
+busy_timeout
+cache_size
+cache_spill
+case_sensitive_like
+cell_size_check
+checkpoint_fullfsync
+collation_list
+compile_options
+count_changes¹
+data_store_directory¹
+data_version
+database_list
+default_cache_size¹
+defer_foreign_keys
+empty_result_callbacks¹
+encoding
+exclusive locking mode
+foreign_key_check
+foreign_key_list
+foreign_keys
+freelist_count
+full_column_names¹
+fullfsync
+function_list²
+ignore_check_constraints
+incremental_vacuum
+index_info
+index_list
+index_xinfo
+integrity_check
+journal_mode
+journal_size_limit
+legacy_alter_table
+legacy_file_format
+locking_mode
+max_page_count
+mmap_size
+module_list²
+optimize
+page_count
+page_size
+parser_trace²
+persistent journal mode
+pragma_list²
+query_only
+quick_check
+read_uncommitted
+recursive_triggers
+reverse_unordered_selects
+schema_version³
+secure_delete
+short_column_names¹
+shrink_memory
+soft_heap_limit
+stats³
+synchronous
+table_info
+table_xinfo
+temp_store
+temp_store_directory¹
+threads
+user_version
+vdbe_addoptrace²
+vdbe_debug²
+vdbe_listing²
+vdbe_trace²
+wal_autocheckpoint
+wal_checkpoint
+writable_schema³
+Notes:
+
+Pragmas whose names are struck through are deprecated. Do not use them. They exist for historical compatibility.
+These pragmas are only available in builds using non-standard compile-time options.
+These pragmas are used for testing SQLite and are not recommended for use in application programs.

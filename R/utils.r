@@ -7,7 +7,7 @@
 get_os <-  function(){
 
   info <- capture.output(sessionInfo())
-  os <- info[3]
+  os <- info[2]
 
   if (grepl(pattern = "linux", x = os, ignore.case = T)) {
     return("linux")
@@ -27,7 +27,7 @@ get_sqlite_cli_binary <- function(use_sys_exe = TRUE){
 
   lib_path <- .libPaths()
   pkgs <- list.dirs(path = lib_path, recursive = F)
-  this_pkg <- grep(pattern = "SQLiteRsq", x = pkgs, ignore.case = T, value = T)
+  this_pkg <- grep(pattern = "resqlite", x = pkgs, ignore.case = T, value = T)
 
   if (os == "linux") {
 
@@ -62,6 +62,18 @@ clean_col_headers <- function(col_names){
   # Function to clean up column names.
   # Generates db friendly column names.
   # e.g. changes '.', '-', ' ' into '_'; removes ':', ';', ',', '|', '>', '<', '=', etc...
+}
+
+create_options_string <- function(options_list){
+
+  nm <- names(options_list)
+  nm <- paste(".", nm, sep = "")
+  vals <- unlist(options_list)
+
+  output <- paste("'", nm, " ", vals, "'", sep = "", collapse = " ")
+
+  return(output)
+
 }
 
 # CONVERT DATA FRAMES TO CHARACTER VECTORS ----

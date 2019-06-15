@@ -37,7 +37,7 @@ chk_tbl_headers <- function(conn, tbl){
 
   res <- system(command = cmd, intern = T)
   res <- strsplit(x = res, split = "\\|")
-  res <- rapply(res, function(x) x[2])
+  res <- rapply(res[2:length(res)], function(x) x[2])
 
   return(res)
 
