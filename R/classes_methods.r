@@ -5,17 +5,13 @@ setClass("SQLiteConn",
          slots = list(binary = "character",
                       db_path = "character",
                       conn_string = "character",
+                      conn_strg_no_opts = "character",
                       options = "list",
                       pragma = "list",
                       tables = "list",
                       fields = "list",
-                      sha3sum = "character" # Needs to be updated after each change in the database.
-                      ),
-         prototype = list(binary = .sqlite_bin,
-                          options = list(headers = "on",
-                                         mode = "list"
-                                         )
-                          )
+                      sha3sum = "character" #TODO(): Needs to be updated after each change in the database.
+                      )
 )
 
 setValidity("SQLiteConn", function(object) {
@@ -48,7 +44,8 @@ setMethod("initialize", signature  = "SQLiteConn",
                                   db_path,
                                   binary = .sqlite_bin,
                                   options = list(headers = "on",
-                                                 mode = "list")
+                                                 mode = "list"),
+                                 ...
                                  ) {
 
              opt_strg <- create_options_string(options)
@@ -56,9 +53,14 @@ setMethod("initialize", signature  = "SQLiteConn",
              .Object@binary <- binary
              .Object@db_path <- db_path
              .Object@conn_string <- paste0(.Object@binary, " ", .Object@db_path, " ", opt_strg)
+             .Object@conn_strg_no_opts <- paste0(.Object@binary, " ", .Object@db_path)
              .Object@tables <- chk_tbls(.Object)
              .Object@fields <- lapply(.Object@tables, chk_tbl_headers, conn = .Object)
              .Object@sha3sum <- system(paste0(.Object@conn_string, " '.sha3sum'"), intern = T)[2]
+             .Object@options <- options
+
+             .Object <- callNextMethod()
+             validObject(.Object)
              return(.Object)
            })
 
@@ -80,11 +82,11 @@ setMethod("show", signature = "SQLiteConn",
 
           })
 
-NewSQLiteConnection <- function(path, binary = .sqlite_bin){
+NewSQLiteConnection <- function(path, binary = .sqlite_bin, ...){
 
-  new_obj <- new(Class = "SQLiteConn", db_path = path, binary = .sqlite_bin)
+  new_obj <- new(Class = "SQLiteConn", db_path = path, binary = binary, ...)
 
-  .last_sqlite_conn <- new_obj
+  .last_sqlite_conn <<- new_obj
 
   cat("\nCreated following database connection:\n")
   show(new_obj)
@@ -159,9 +161,10 @@ setGeneric("sha3sum<-", function(ConnObj){standardGeneric("sha3sum<-")})
 setMethod(f = "sha3sum<-", signature = "SQLiteConn", definition = function(ConnObj){
 
   ConnObj@sha3sum <- system(paste0(ConnObj@conn_string, " '.sha3sum'"), intern = T)[2]
+
   validObject(ConnObj)
 
-  ConnObj
+  return(ConnObj)
 
 })
 
@@ -198,6 +201,7 @@ setMethod(f = "GetQueryResults", signature = "SQLiteConn", definition = function
 setGeneric("InsertData", function(ConnObj, data){standardGeneric("InsertData")})
 setMethod(f = "InsertData", signature = "SQLiteConn", definition = function(ConnObj, data){
 
+  # Run Update Connection method @ end to update sha3sum.
   # Get data and check if it is a vector, data frame, list, etc...
   # Check the number of columns if a data frame.
   # check that the names of the data columns are the same and in the same order as in the DB table.
@@ -209,7 +213,7 @@ setMethod(f = "InsertData", signature = "SQLiteConn", definition = function(Conn
   #
   # Data frames rows should be converted to character vector of length 1.
   # Use transactions: BEGIN TRANSACTION; COMMIT;
-  # Example: sqlite3 tests/testthat/test_create_db.sqlite 'BEGIN TRANSACTION;' 'INSERTINTO tbl VALUES("r4c1", "r4c2", "r4c3");' 'INSERT INTO tbl VALUES("r5c1", "r5c2", "r5c3");' 'INSERT INTO tbl VALUES("r6c1", NULL, "r6c3");' 'COMMIT;'
+  # Example: sqlite3 tests/testthat/test_create_db.sqlite 'BEGIN TRANSACTION;' 'INSERT INTO tbl VALUES("r4c1", "r4c2", "r4c3");' 'INSERT INTO tbl VALUES("r5c1", "r5c2", "r5c3");' 'INSERT INTO tbl VALUES("r6c1", NULL, "r6c3");' 'COMMIT;'
 
 
 
@@ -229,7 +233,7 @@ setMethod(f = "ExecuteStatement", signature = "SQLiteConn", definition = functio
 
   if (!grepl("'.*'", qry, perl = T)) qry <- paste0("'", qry, "'")
 
-  cmd <- sprintf("%s '.headers on' %s", ConnObj@conn_string, qry) #TODO(): change '.headers on' with option string.
+  cmd <- sprintf("%s %s", ConnObj@conn_string, qry) #TODO(): change '.headers on' with option string.
 
   output <- system(command = cmd, intern = T)
 
@@ -247,12 +251,21 @@ setMethod(f = "IsValidSQLiteConnection", signature = "SQLiteConn", definition = 
 setGeneric("UpdateSQLiteConnection", function(ConnObj, ...){standardGeneric("UpdateSQLiteConnection")})
 setMethod(f = "UpdateSQLiteConnection", signature = "SQLiteConn", definition = function(ConnObj, ...){
             argts <- list(...)
+            # Modify the slots according to the arguments passed.
             if(hasArg(db_path)) ConnObj@db_path <- argts$db_path
             if(hasArg(binary)) ConnObj@binary <- argts$binary
-            #ConnObj@tables <- chk_tbls(ConnObj) # not working -> find a way
+            if(hasArg(options)) ConnObj@options <- argts$options
+            if(hasArg(db_path) & hasArg(binary)) ConnObj@conn_string <- paste0(ConnObj@binary, " ", ConnObj@db_path, " ", create_options_string(ConnObj@options))
+            if(hasArg(db_path) & hasArg(binary) & hasArg(options)) ConnObj@conn_strg_no_opts <- paste0(ConnObj@binary, " ", ConnObj@db_path)
+
+            # recreate remaining slots.
+
+            #ConnObj@tables <- chk_tbls(ConnObj) # not working -> find a way. NECESSARY?
             #ConnObj@fields <- lapply(ConnObj@tables, chk_tbl_headers, conn = ConnObj) -> not working, find a way.
             #Split the update in several steps?
-            ConnObj@conn_string <- paste0(ConnObj@binary, " ", ConnObj@db_path)
+            ConnObj@sha3sum <- system(paste0(.Object@conn_string, " '.sha3sum'"), intern = T)[2]
+
+            validObject(ConnObj)
 
             return(ConnObj)
 
@@ -266,16 +279,16 @@ setMethod(f = "DeleteSQLiteConnection", signature = "SQLiteConn", definition = f
             cat(paste0("Removed connection object: ", deparse(substitute(ConnObj))))
           })
 
-setGeneric("RecoverLastSQLiteConnection", function(ConnObj = .last_sqlite_conn){standardGeneric("RecoverLastSQLiteConnection")})
-setMethod(f = "RecoverLastSQLiteConnection", signature = "SQLiteConn", definition = function(ConnObj = .last_sqlite_conn){
+RecoverLastSQLiteConnection <- function(ConnObj = .last_sqlite_conn){
             return(ConnObj)
-          })
+          }
 
 setGeneric("InsertCSV", function(ConnObj, table_name){standardGeneric("InsertCSV")})
 setMethod(f = "InsertCSV", signature = "SQLiteConn", definition = function(ConnObj, table_name){
   # Need to check for correct table names.
   # Have options to check only number of columns?
   # Have option to choose the columns to import?
+  # Call UpdateConnection method in order to update sha3sum.
   #
   #sqlite3 'tests/testthat/test_create_db.sqlite' '.mode csv' '.import trial.csv tbl'
 })
