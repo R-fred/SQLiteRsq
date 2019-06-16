@@ -108,6 +108,18 @@ convert_char_to_input_string <- function(data){
 
 }
 
+# DEAL WITH NUMERICS AND CHARACTERS ----
+
+convert_to_numeric <- function(data){
+
+  n <- sum(grepl(pattern = "[^0-9.]", x = data, ignore.case = T))
+
+  if (n == 0) data <- as.numeric(data)
+
+  return(data)
+
+}
+
 # BACKUP ----
 
 setGeneric("BackUpDB", function(ConnObj, ...){standardGeneric("BackUpDB")})

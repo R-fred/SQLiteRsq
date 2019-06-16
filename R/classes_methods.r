@@ -179,17 +179,23 @@ setMethod(f = "GetQueryResults", signature = "SQLiteConn", definition = function
   if (length(res >= 1)) {
 
     output <- lapply(res, strsplit, split = "\\|") # Results are returned separated by '|'
+    names_output <- as.character(unlist(output[[1]])) # headers are in the first row.
+    output[[1]] <- NULL
+
 
     output <- unlist(output, recursive = F) # List is two levels with headers on.
-    output <- lapply(output, function(x) as.data.frame(t(as.list(x))))
+    #TODO(): function to convert elements of the output list into numeric if only numbers and points (or commas) are returned.
 
-    output <- data.table::rbindlist(output)
-    names(output) <- as.character(unlist(output[1,])) # headers are in the first row.
-    output <- output[-1,]
+    output <- lapply(output, function(x) as.data.frame(t(x), stringsAsFactors = F)) #t(as.list(x))
 
     if (isTRUE(dataTable)) {
+      output <- data.table::rbindlist(output)
       output <- data.table::as.data.table(output)
+    } else {
+      output <- do.call("rbind", output)
     }
+
+    names(output) <- names_output
 
 
   }
