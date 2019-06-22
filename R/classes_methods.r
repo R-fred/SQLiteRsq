@@ -170,37 +170,11 @@ setMethod(f = "sha3sum<-", signature = "SQLiteConn", definition = function(ConnO
 
 # Methods to work with objects ----
 
-setGeneric("GetQueryResults", function(ConnObj, qry, dataTable = F){standardGeneric("GetQueryResults")})
-setMethod(f = "GetQueryResults", signature = "SQLiteConn", definition = function(ConnObj, qry, dataTable = F){
+setGeneric("GetQueryResults", function(ConnObj, qry, dataTable = F, default = F){standardGeneric("GetQueryResults")})
+setMethod(f = "GetQueryResults", signature = "SQLiteConn", definition = function(ConnObj, qry, dataTable = F, default = F){
 
-  res <- ExecuteStatement(ConnObj = ConnObj, qry = qry)
+  data.table::fread(cmd = ExecuteStatement(ConnObj = ConnObj, qry = qry, default = default))
 
-  if (length(res == 0)) output <- NULL
-  if (length(res >= 1)) {
-
-    output <- lapply(res, strsplit, split = "\\|") # Results are returned separated by '|'
-    names_output <- as.character(unlist(output[[1]])) # headers are in the first row.
-    output[[1]] <- NULL
-
-
-    output <- unlist(output, recursive = F) # List is two levels with headers on.
-    #TODO(): function to convert elements of the output list into numeric if only numbers and points (or commas) are returned.
-
-    output <- lapply(output, function(x) as.data.frame(t(x), stringsAsFactors = F)) #t(as.list(x))
-
-    if (isTRUE(dataTable)) {
-      output <- data.table::rbindlist(output)
-      output <- data.table::as.data.table(output)
-    } else {
-      output <- do.call("rbind", output)
-    }
-
-    names(output) <- names_output
-
-
-  }
-
-  return(output)
 
 })
 
@@ -225,8 +199,8 @@ setMethod(f = "InsertData", signature = "SQLiteConn", definition = function(Conn
 
 })
 
-setGeneric("ExecuteStatement", function(ConnObj, qry){standardGeneric("ExecuteStatement")})
-setMethod(f = "ExecuteStatement", signature = "SQLiteConn", definition = function(ConnObj, qry){
+setGeneric("ExecuteStatement", function(ConnObj, qry, default = F){standardGeneric("ExecuteStatement")})
+setMethod(f = "ExecuteStatement", signature = "SQLiteConn", definition = function(ConnObj, qry, default = F){
 
   # THOUGHTS:
   # COUNT(*) statement can be done with .headers off. Otherwise COUNT(*) is returned as header.
@@ -241,11 +215,13 @@ setMethod(f = "ExecuteStatement", signature = "SQLiteConn", definition = functio
 
   cmd <- sprintf("%s %s", ConnObj@conn_string, qry) #TODO(): change '.headers on' with option string.
 
-  output <- system(command = cmd, intern = T)
+  if (!isTRUE(default)){
+    system(command = cmd, intern = T)
+  } else {
+    return(cmd)
+  }
 
   # if (grepl("COUNT(.*)", qry)) output <- as.numeric(output)
-
-  return(output)
 
 })
 
@@ -297,4 +273,41 @@ setMethod(f = "InsertCSV", signature = "SQLiteConn", definition = function(ConnO
   # Call UpdateConnection method in order to update sha3sum.
   #
   #sqlite3 'tests/testthat/test_create_db.sqlite' '.mode csv' '.import trial.csv tbl'
+})
+
+# Old versions ----
+
+setGeneric("GetQueryResults_old", function(ConnObj, qry, dataTable = F){standardGeneric("GetQueryResults_old")})
+setMethod(f = "GetQueryResults_old", signature = "SQLiteConn", definition = function(ConnObj, qry, dataTable = F){
+
+  res <- ExecuteStatement(ConnObj = ConnObj, qry = qry)
+
+  if (length(res == 0)) output <- NULL
+  if (length(res >= 1)) {
+
+    output <- lapply(res, strsplit, split = "\\|") # Results are returned separated by '|'
+    names_output <- as.character(unlist(output[[1]])) # headers are in the first row.
+    output[[1]] <- NULL
+
+
+    output <- unlist(output, recursive = F) # List is two levels with headers on.
+
+    output <- lapply(output, function(x) as.data.frame(t(x), stringsAsFactors = F)) #t(as.list(x))
+
+    if (isTRUE(dataTable)) {
+      output <- data.table::rbindlist(output)
+      output <- data.table::as.data.table(output)
+    } else {
+      output <- do.call("rbind", output)
+    }
+
+    names(output) <- names_output
+
+
+  }
+
+  output <- rapply(output, convert_to_numeric, how = "replace")
+
+  return(output)
+
 })
