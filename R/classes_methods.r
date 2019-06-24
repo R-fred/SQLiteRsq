@@ -173,7 +173,7 @@ setMethod(f = "sha3sum<-", signature = "SQLiteConn", definition = function(ConnO
 setGeneric("GetQueryResults", function(ConnObj, qry, dataTable = F, default = T){standardGeneric("GetQueryResults")})
 setMethod(f = "GetQueryResults", signature = "SQLiteConn", definition = function(ConnObj, qry, dataTable = F, default = T){
 
-  data.table::fread(cmd = ExecuteStatement(ConnObj = ConnObj, qry = qry, default = default))
+  data.table::fread(cmd = ExecuteStatement(ConnObj = ConnObj, qry = qry, default = default), sep = "|")
 
 
 })
