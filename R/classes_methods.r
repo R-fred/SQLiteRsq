@@ -11,7 +11,7 @@ setClass("SQLiteConn",
                       tables = "list",
                       fields = "list",
                       sha3sum = "character" #TODO(): Needs to be updated after each change in the database.
-                      )
+         )
 )
 
 setValidity("SQLiteConn", function(object) {
@@ -40,29 +40,29 @@ setValidity("SQLiteConn", function(object) {
 })
 
 setMethod("initialize", signature  = "SQLiteConn",
-           definition = function(.Object,
-                                  db_path,
-                                  binary = .sqlite_bin,
-                                  options = list(headers = "on",
-                                                 mode = "list"),
-                                 ...
-                                 ) {
+          definition = function(.Object,
+                                db_path,
+                                binary = .sqlite_bin,
+                                options = list(headers = "on",
+                                               mode = "list"),
+                                ...
+          ) {
 
-             opt_strg <- create_options_string(options)
+            opt_strg <- create_options_string(options)
 
-             .Object@binary <- binary
-             .Object@db_path <- db_path
-             .Object@conn_string <- paste0(.Object@binary, " ", .Object@db_path, " ", opt_strg)
-             .Object@conn_strg_no_opts <- paste0(.Object@binary, " ", .Object@db_path)
-             .Object@tables <- chk_tbls(.Object)
-             .Object@fields <- lapply(.Object@tables, chk_tbl_headers, conn = .Object)
-             .Object@sha3sum <- system(paste0(.Object@conn_string, " '.sha3sum'"), intern = T)[2]
-             .Object@options <- options
+            .Object@binary <- binary
+            .Object@db_path <- db_path
+            .Object@conn_string <- paste0(.Object@binary, " ", .Object@db_path, " ", opt_strg)
+            .Object@conn_strg_no_opts <- paste0(.Object@binary, " ", .Object@db_path)
+            .Object@tables <- chk_tbls(.Object)
+            .Object@fields <- lapply(.Object@tables, chk_tbl_headers, conn = .Object)
+            .Object@sha3sum <- system(paste0(.Object@conn_string, " '.sha3sum'"), intern = T)[2]
+            .Object@options <- options
 
-             .Object <- callNextMethod()
-             validObject(.Object)
-             return(.Object)
-           })
+            .Object <- callNextMethod()
+            validObject(.Object)
+            return(.Object)
+          })
 
 setMethod("show", signature = "SQLiteConn",
           definition = function(object){
@@ -170,10 +170,10 @@ setMethod(f = "sha3sum<-", signature = "SQLiteConn", definition = function(ConnO
 
 # Methods to work with objects ----
 
-setGeneric("GetQueryResults", function(ConnObj, qry, dataTable = F, default = T){standardGeneric("GetQueryResults")})
-setMethod(f = "GetQueryResults", signature = "SQLiteConn", definition = function(ConnObj, qry, dataTable = F, default = T){
+setGeneric("GetQueryResults", function(ConnObj, qry, dataTable = F){standardGeneric("GetQueryResults")})
+setMethod(f = "GetQueryResults", signature = "SQLiteConn", definition = function(ConnObj, qry, dataTable = F){
 
-  data.table::fread(cmd = ExecuteStatement(ConnObj = ConnObj, qry = qry, default = default), sep = "|")
+  data.table::fread(text = ExecuteStatement(ConnObj = ConnObj, qry = qry), sep = "|", data.table = dataTable)
 
 
 })
@@ -199,8 +199,8 @@ setMethod(f = "InsertData", signature = "SQLiteConn", definition = function(Conn
 
 })
 
-setGeneric("ExecuteStatement", function(ConnObj, qry, default = F){standardGeneric("ExecuteStatement")})
-setMethod(f = "ExecuteStatement", signature = "SQLiteConn", definition = function(ConnObj, qry, default = F){
+setGeneric("ExecuteStatement", function(ConnObj, qry){standardGeneric("ExecuteStatement")})
+setMethod(f = "ExecuteStatement", signature = "SQLiteConn", definition = function(ConnObj, qry){
 
   # THOUGHTS:
   # COUNT(*) statement can be done with .headers off. Otherwise COUNT(*) is returned as header.
@@ -213,13 +213,9 @@ setMethod(f = "ExecuteStatement", signature = "SQLiteConn", definition = functio
 
   if (!grepl("'.*'", qry, perl = T)) qry <- paste0("'", qry, "'")
 
-  cmd <- sprintf("%s %s", ConnObj@conn_string, qry) #TODO(): change '.headers on' with option string.
-
-  if (!isTRUE(default)){
-    system(command = cmd, intern = T)
-  } else {
-    return(cmd)
-  }
+  #argt <- sprintf("%s '.headers on' %s", ConnObj@db_path, qry)
+  argt <- paste0(ConnObj@db_path, " ", "'.headers on'", " ", qry)
+  system2(command = ConnObj@binary, args = argt, stdout = T)
 
   # if (grepl("COUNT(.*)", qry)) output <- as.numeric(output)
 
@@ -227,43 +223,43 @@ setMethod(f = "ExecuteStatement", signature = "SQLiteConn", definition = functio
 
 setGeneric("IsValidSQLiteConnection", function(ConnObj){standardGeneric("IsValidSQLiteConnection")})
 setMethod(f = "IsValidSQLiteConnection", signature = "SQLiteConn", definition = function(ConnObj){
-          validObject(ConnObj)
-             })
+  validObject(ConnObj)
+})
 
 setGeneric("UpdateSQLiteConnection", function(ConnObj, ...){standardGeneric("UpdateSQLiteConnection")})
 setMethod(f = "UpdateSQLiteConnection", signature = "SQLiteConn", definition = function(ConnObj, ...){
-            argts <- list(...)
-            # Modify the slots according to the arguments passed.
-            if(hasArg(db_path)) ConnObj@db_path <- argts$db_path
-            if(hasArg(binary)) ConnObj@binary <- argts$binary
-            if(hasArg(options)) ConnObj@options <- argts$options
-            if(hasArg(db_path) & hasArg(binary)) ConnObj@conn_string <- paste0(ConnObj@binary, " ", ConnObj@db_path, " ", create_options_string(ConnObj@options))
-            if(hasArg(db_path) & hasArg(binary) & hasArg(options)) ConnObj@conn_strg_no_opts <- paste0(ConnObj@binary, " ", ConnObj@db_path)
+  argts <- list(...)
+  # Modify the slots according to the arguments passed.
+  if(hasArg(db_path)) ConnObj@db_path <- argts$db_path
+  if(hasArg(binary)) ConnObj@binary <- argts$binary
+  if(hasArg(options)) ConnObj@options <- argts$options
+  if(hasArg(db_path) & hasArg(binary)) ConnObj@conn_string <- paste0(ConnObj@binary, " ", ConnObj@db_path, " ", create_options_string(ConnObj@options))
+  if(hasArg(db_path) & hasArg(binary) & hasArg(options)) ConnObj@conn_strg_no_opts <- paste0(ConnObj@binary, " ", ConnObj@db_path)
 
-            # recreate remaining slots.
+  # recreate remaining slots.
 
-            #ConnObj@tables <- chk_tbls(ConnObj) # not working -> find a way. NECESSARY?
-            #ConnObj@fields <- lapply(ConnObj@tables, chk_tbl_headers, conn = ConnObj) -> not working, find a way.
-            #Split the update in several steps?
-            ConnObj@sha3sum <- system(paste0(.Object@conn_string, " '.sha3sum'"), intern = T)[2]
+  #ConnObj@tables <- chk_tbls(ConnObj) # not working -> find a way. NECESSARY?
+  #ConnObj@fields <- lapply(ConnObj@tables, chk_tbl_headers, conn = ConnObj) -> not working, find a way.
+  #Split the update in several steps?
+  ConnObj@sha3sum <- system(paste0(.Object@conn_string, " '.sha3sum'"), intern = T)[2]
 
-            validObject(ConnObj)
+  validObject(ConnObj)
 
-            return(ConnObj)
+  return(ConnObj)
 
-            })
+})
 
 setGeneric("DeleteSQLiteConnection", function(ConnObj){standardGeneric("DeleteSQLiteConnection")})
 setMethod(f = "DeleteSQLiteConnection", signature = "SQLiteConn", definition = function(ConnObj){
-            en <- parent.env(env = environment())
-            eval(parse(text = paste0("rm(\"", deparse(substitute(ConnObj)), "\"", ", envir = ", quote(en), ")")))
-            #rm(eval(quote(ConnObj)), envir = parent.frame())
-            cat(paste0("Removed connection object: ", deparse(substitute(ConnObj))))
-          })
+  en <- parent.env(env = environment())
+  eval(parse(text = paste0("rm(\"", deparse(substitute(ConnObj)), "\"", ", envir = ", quote(en), ")")))
+  #rm(eval(quote(ConnObj)), envir = parent.frame())
+  cat(paste0("Removed connection object: ", deparse(substitute(ConnObj))))
+})
 
 RecoverLastSQLiteConnection <- function(ConnObj = .last_sqlite_conn){
-            return(ConnObj)
-          }
+  return(ConnObj)
+}
 
 setGeneric("InsertCSV", function(ConnObj, table_name){standardGeneric("InsertCSV")})
 setMethod(f = "InsertCSV", signature = "SQLiteConn", definition = function(ConnObj, table_name){
