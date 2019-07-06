@@ -178,8 +178,8 @@ setMethod(f = "GetQueryResults", signature = "SQLiteConn", definition = function
 
 })
 
-setGeneric("InsertData", function(ConnObj, data){standardGeneric("InsertData")})
-setMethod(f = "InsertData", signature = "SQLiteConn", definition = function(ConnObj, data){
+setGeneric("InsertData", function(ConnObj, table, data){standardGeneric("InsertData")})
+setMethod(f = "InsertData", signature = "SQLiteConn", definition = function(ConnObj, table, data){
 
   # Run Update Connection method @ end to update sha3sum.
   # Get data and check if it is a vector, data frame, list, etc...
@@ -195,17 +195,33 @@ setMethod(f = "InsertData", signature = "SQLiteConn", definition = function(Conn
   # Use transactions: BEGIN TRANSACTION; COMMIT;
   # Example: sqlite3 tests/testthat/test_create_db.sqlite 'BEGIN TRANSACTION;' 'INSERT INTO tbl VALUES("r4c1", "r4c2", "r4c3");' 'INSERT INTO tbl VALUES("r5c1", "r5c2", "r5c3");' 'INSERT INTO tbl VALUES("r6c1", NULL, "r6c3");' 'COMMIT;'
 
+  # USE CONVERT_DT_TO_INPUT_STRING
 
+  # transposed_data <- as.data.frame(t(data)), stringsAsFactors = F)
+  # transposed_data <- unclass(transposed_data)
+  #
+  # to_insert <- lapply(transposed_data, paste, sep = "", collapse = "', '")
+  # to_insert <- as.character(to_insert)
+  # to_insert <- trimws(to_insert)
+  # to_insert <- paste0("'", to_insert, "'")
+  #
+  # to_insert <- paste(to_insert, sep = "", collapse = " ")
+  #
+  # return(to_insert)
+
+  #
+
+  cnv_data <- convert_dt_to_input_string(data)
+  cnv_data <- paste("\"","INSERT INTO ", table, " ", cnv_data, ";", "\"", sep = "", collapse = " ")
+
+  qry <- paste0("'BEGIN TRANSACTION;' ", cnv_data, " 'COMMIT;'")
+
+  ExecuteStatement(ConnObj = ConnObj, qry = cnv_data)
 
 })
 
 setGeneric("ExecuteStatement", function(ConnObj, qry){standardGeneric("ExecuteStatement")})
 setMethod(f = "ExecuteStatement", signature = "SQLiteConn", definition = function(ConnObj, qry){
-
-  # THOUGHTS:
-  # COUNT(*) statement can be done with .headers off. Otherwise COUNT(*) is returned as header.
-  # .headers on should be used at all times except for COUNT(*) in order to allow for JOINS.
-  # Use 'AS n_row' to get a proper header for COUNT(*).
 
   isValid <- IsValidSQLiteConnection(ConnObj = ConnObj)
 
@@ -213,11 +229,11 @@ setMethod(f = "ExecuteStatement", signature = "SQLiteConn", definition = functio
 
   if (!grepl("'.*'", qry, perl = T)) qry <- paste0("'", qry, "'")
 
-  #argt <- sprintf("%s '.headers on' %s", ConnObj@db_path, qry)
+  opts <- create_options_string(options_list = options(ConnObj))
+
+  argt <- sprintf("%s %s %s", ConnObj@db_path, opts, qry)
   argt <- paste0(ConnObj@db_path, " ", "'.headers on'", " ", qry)
   system2(command = ConnObj@binary, args = argt, stdout = T)
-
-  # if (grepl("COUNT(.*)", qry)) output <- as.numeric(output)
 
 })
 
@@ -288,7 +304,7 @@ setMethod(f = "GetQueryResults_old", signature = "SQLiteConn", definition = func
 
     output <- unlist(output, recursive = F) # List is two levels with headers on.
 
-    output <- lapply(output, function(x) as.data.frame(t(x), stringsAsFactors = F)) #t(as.list(x))
+    output <- lapply(output, function(x) as.data.frame(t(x), stringsAsFactors = F))
 
     if (isTRUE(dataTable)) {
       output <- data.table::rbindlist(output)

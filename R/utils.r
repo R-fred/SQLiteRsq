@@ -102,6 +102,8 @@ convert_char_to_input_string <- function(data){
 
   output <- paste0("VALUES('", gsub(x = output, pattern = ", ", replacement = "', '"), "')")
 
+  #output <- paste0("VALUES('", gsub(x = output, pattern = "[A-Za-z-_\\.], ", replacement = "', '"), "')")
+
   output <- gsub(pattern = "'NA'", replacement = "NULL", x = output)
 
   return(output)
