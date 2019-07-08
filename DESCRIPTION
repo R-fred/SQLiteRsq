@@ -1,4 +1,4 @@
-Package: SQLiteRsq
+Package: resqlite
 Type: Package
 Title: What the Package Does (Title Case)
 Version: 0.1.0
@@ -7,7 +7,12 @@ Maintainer: Frederick Chesneau <fchesneau@gmail.com>
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 License: GPL3
+URL: https://github.com/R-fred/resqlite
+BugReports: https://github.com/R-fred/resqlite
 Encoding: UTF-8
 LazyData: true
+Imports:
+    methods
+    data.table
 Suggests: 
     testthat

@@ -9,11 +9,11 @@ get_os <-  function(){
   info <- capture.output(sessionInfo())
   os <- info[2]
 
-  if (grepl(pattern = "linux", x = os, ignore.case = T)) {
+  if (grepl(pattern = "linux", x = os, ignore.case = TRUE)) {
     return("linux")
   }
 
-  if (grepl(pattern = "windows", x = os, ignore.case = T)) {
+  if (grepl(pattern = "windows", x = os, ignore.case = TRUE)) {
     return(("windows"))
   }
 
@@ -26,8 +26,8 @@ get_sqlite_cli_binary <- function(use_sys_exe = TRUE){
   os <- get_os()
 
   lib_path <- .libPaths()
-  pkgs <- list.dirs(path = lib_path, recursive = F)
-  this_pkg <- grep(pattern = "resqlite", x = pkgs, ignore.case = T, value = T)
+  pkgs <- list.dirs(path = lib_path, recursive = FALSE)
+  this_pkg <- grep(pattern = "resqlite", x = pkgs, ignore.case = TRUE, value = TRUE)
 
   if (os == "linux") {
 
@@ -55,7 +55,7 @@ exists2 <- function(object){
 
   if (!is.character(object)) stop("\nObject should be of type character.\n")
 
-  object %in% ls(all.names = T, envir = parent.frame())
+  object %in% ls(all.names = TRUE, envir = parent.frame())
 }
 
 clean_col_headers <- function(col_names){
@@ -114,7 +114,7 @@ convert_char_to_input_string <- function(data){
 
 convert_to_numeric <- function(data){
 
-  n <- sum(grepl(pattern = "[^0-9.]", x = data, ignore.case = T))
+  n <- sum(grepl(pattern = "[^0-9.]", x = data, ignore.case = TRUE))
 
   if (n == 0) data <- as.numeric(data)
 

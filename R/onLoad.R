@@ -2,6 +2,6 @@
 
   .sqlite_bin <- get_sqlite_cli_binary()
 
-  source("R/classes.r")
+  source("R/classes_methods.r")
 
 }

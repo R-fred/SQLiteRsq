@@ -1,3 +1,4 @@
-exportPattern("^[[:alpha:]]+")
+#exportPattern("^[[:alpha:]]+")
 exportClasses(SQLiteConn)
-exportMethods(SQLiteConnect)
+exportMethods(binary)
+exportMethods(db_path)

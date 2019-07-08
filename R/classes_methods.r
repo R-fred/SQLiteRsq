@@ -56,7 +56,7 @@ setMethod("initialize", signature  = "SQLiteConn",
             .Object@conn_strg_no_opts <- paste0(.Object@binary, " ", .Object@db_path)
             .Object@tables <- chk_tbls(.Object)
             .Object@fields <- lapply(.Object@tables, chk_tbl_headers, conn = .Object)
-            .Object@sha3sum <- system(paste0(.Object@conn_string, " '.sha3sum'"), intern = T)[2]
+            .Object@sha3sum <- system(paste0(.Object@conn_string, " '.sha3sum'"), intern = TRUE)[2]
             .Object@options <- options
 
             .Object <- callNextMethod()
@@ -105,7 +105,7 @@ setMethod(f = "db_path", signature = "SQLiteConn", definition = function(ConnObj
   ConnObj@db_path
 })
 
-setGeneric("conn_string", function(ConnObj){standardGeneric("db_path")})
+setGeneric("conn_string", function(ConnObj){standardGeneric("conn_string")})
 setMethod(f = "conn_string", signature = "SQLiteConn", definition = function(ConnObj){
   ConnObj@conn_string
 })
@@ -160,7 +160,7 @@ setMethod(f = "db_path<-", signature = "SQLiteConn", definition = function(ConnO
 setGeneric("sha3sum<-", function(ConnObj){standardGeneric("sha3sum<-")})
 setMethod(f = "sha3sum<-", signature = "SQLiteConn", definition = function(ConnObj){
 
-  ConnObj@sha3sum <- system(paste0(ConnObj@conn_string, " '.sha3sum'"), intern = T)[2]
+  ConnObj@sha3sum <- system(paste0(ConnObj@conn_string, " '.sha3sum'"), intern = TRUE)[2]
 
   validObject(ConnObj)
 
@@ -170,8 +170,8 @@ setMethod(f = "sha3sum<-", signature = "SQLiteConn", definition = function(ConnO
 
 # Methods to work with objects ----
 
-setGeneric("GetQueryResults", function(ConnObj, qry, dataTable = F){standardGeneric("GetQueryResults")})
-setMethod(f = "GetQueryResults", signature = "SQLiteConn", definition = function(ConnObj, qry, dataTable = F){
+setGeneric("GetQueryResults", function(ConnObj, qry, dataTable = FALSE){standardGeneric("GetQueryResults")})
+setMethod(f = "GetQueryResults", signature = "SQLiteConn", definition = function(ConnObj, qry, dataTable = FALSE){
 
   data.table::fread(text = ExecuteStatement(ConnObj = ConnObj, qry = qry), sep = "|", data.table = dataTable)
 
@@ -227,13 +227,13 @@ setMethod(f = "ExecuteStatement", signature = "SQLiteConn", definition = functio
 
   if (!isTRUE(isValid)) stop("Invalid connection object.\nStopping now.")
 
-  if (!grepl("'.*'", qry, perl = T)) qry <- paste0("'", qry, "'")
+  if (!grepl("'.*'", qry, perl = TRUE)) qry <- paste0("'", qry, "'")
 
   opts <- create_options_string(options_list = options(ConnObj))
 
   argt <- sprintf("%s %s %s", ConnObj@db_path, opts, qry)
   argt <- paste0(ConnObj@db_path, " ", "'.headers on'", " ", qry)
-  system2(command = ConnObj@binary, args = argt, stdout = T)
+  system2(command = ConnObj@binary, args = argt, stdout = TRUE)
 
 })
 
@@ -257,7 +257,7 @@ setMethod(f = "UpdateSQLiteConnection", signature = "SQLiteConn", definition = f
   #ConnObj@tables <- chk_tbls(ConnObj) # not working -> find a way. NECESSARY?
   #ConnObj@fields <- lapply(ConnObj@tables, chk_tbl_headers, conn = ConnObj) -> not working, find a way.
   #Split the update in several steps?
-  ConnObj@sha3sum <- system(paste0(.Object@conn_string, " '.sha3sum'"), intern = T)[2]
+  ConnObj@sha3sum <- system(paste0(.Object@conn_string, " '.sha3sum'"), intern = TRUE)[2]
 
   validObject(ConnObj)
 
@@ -289,8 +289,8 @@ setMethod(f = "InsertCSV", signature = "SQLiteConn", definition = function(ConnO
 
 # Old versions ----
 
-setGeneric("GetQueryResults_old", function(ConnObj, qry, dataTable = F){standardGeneric("GetQueryResults_old")})
-setMethod(f = "GetQueryResults_old", signature = "SQLiteConn", definition = function(ConnObj, qry, dataTable = F){
+setGeneric("GetQueryResults_old", function(ConnObj, qry, dataTable = FALSE){standardGeneric("GetQueryResults_old")})
+setMethod(f = "GetQueryResults_old", signature = "SQLiteConn", definition = function(ConnObj, qry, dataTable = FALSE){
 
   res <- ExecuteStatement(ConnObj = ConnObj, qry = qry)
 
@@ -302,9 +302,9 @@ setMethod(f = "GetQueryResults_old", signature = "SQLiteConn", definition = func
     output[[1]] <- NULL
 
 
-    output <- unlist(output, recursive = F) # List is two levels with headers on.
+    output <- unlist(output, recursive = FALSE) # List is two levels with headers on.
 
-    output <- lapply(output, function(x) as.data.frame(t(x), stringsAsFactors = F))
+    output <- lapply(output, function(x) as.data.frame(t(x), stringsAsFactors = FALSE))
 
     if (isTRUE(dataTable)) {
       output <- data.table::rbindlist(output)

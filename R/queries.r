@@ -35,7 +35,7 @@ chk_tbl_headers <- function(conn, tbl){
 
   cmd <- paste0(conn@conn_string, " ","\"PRAGMA table_info(", tbl,")\"")
 
-  res <- system(command = cmd, intern = T)
+  res <- system(command = cmd, intern = TRUE)
   res <- strsplit(x = res, split = "\\|")
   res <- rapply(res[2:length(res)], function(x) x[2])
 
@@ -51,7 +51,7 @@ chk_tbls <- function(conn){
 
   cmd <- paste0(conn@conn_string, " ", ".tables")
 
-  res <- system(command = cmd, intern = T)
+  res <- system(command = cmd, intern = TRUE)
   res <- strsplit(x = res, split = "\\s+")
   res <- rapply(res, function(x) x)
 
