@@ -170,6 +170,19 @@ setMethod(f = "sha3sum<-", signature = "SQLiteConn", definition = function(ConnO
 
 # Methods to work with objects ----
 
+setGeneric("SendQuery", function(ConnObj, qry){standardGeneric("SendQuery")})
+setMethod(f = "SendQuery", signature = "SQLiteConn", definition = function(ConnObj, qry){
+
+})
+
+setGeneric("CreateTable", function(ConnObj, name, fields){standardGeneric("CreateTable")})
+setMethod(f = "CreateTable", function(ConnObj, name, fields){
+
+  # fields are list as such: list(col1 = "TEXT", col2 = "NUMERIC", col3 = "BLOB")
+
+})
+
+
 setGeneric("GetQueryResults", function(ConnObj, qry, dataTable = FALSE){standardGeneric("GetQueryResults")})
 setMethod(f = "GetQueryResults", signature = "SQLiteConn", definition = function(ConnObj, qry, dataTable = FALSE){
 
