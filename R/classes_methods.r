@@ -176,7 +176,7 @@ setMethod(f = "SendQuery", signature = "SQLiteConn", definition = function(ConnO
 })
 
 setGeneric("CreateTable", function(ConnObj, name, fields){standardGeneric("CreateTable")})
-setMethod(f = "CreateTable", function(ConnObj, name, fields){
+setMethod(f = "CreateTable", signature = "SQLiteConn", definition = function(ConnObj, name, fields){
 
   # fields are list as such: list(col1 = "TEXT", col2 = "NUMERIC", col3 = "BLOB")
 
