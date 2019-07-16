@@ -1,3 +1,5 @@
+library(testthat)
+
 context("classes")
 
 test_that("Create class", {

@@ -117,6 +117,7 @@ convert_to_numeric <- function(data){
   n <- sum(grepl(pattern = "[^0-9.]", x = data, ignore.case = TRUE))
 
   if (n == 0) data <- as.numeric(data)
+  if (sum(grepl(pattern = "[\\.]", x = data, ignore.case = TRUE)) == 0) data <- as.integer(data)
 
   return(data)
 
