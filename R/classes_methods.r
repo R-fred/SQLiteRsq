@@ -173,12 +173,18 @@ setMethod(f = "sha3sum<-", signature = "SQLiteConn", definition = function(ConnO
 setGeneric("SendQuery", function(ConnObj, qry){standardGeneric("SendQuery")})
 setMethod(f = "SendQuery", signature = "SQLiteConn", definition = function(ConnObj, qry){
 
+  ExecuteStatement(ConnObj = ConnObj, qry = qry)
+
 })
 
 setGeneric("CreateTable", function(ConnObj, name, fields){standardGeneric("CreateTable")})
-setMethod(f = "CreateTable", signature = "SQLiteConn", definition = function(ConnObj, name, fields){
+setMethod(f = "CreateTable", signature = "SQLiteConn", definition = function(ConnObj, name = "tbl", fields = list(col1 = "TEXT", col2 = "NUMERIC", col3 = "BLOB")){
 
-  # fields are list as such: list(col1 = "TEXT", col2 = "NUMERIC", col3 = "BLOB")
+  fields_string <- create_table_string(data = fields)
+
+  qry <- sprintf("CREATE TABLE %s(%s)", name, fields_string)
+
+  ExecuteStatement(ConnObj = ConnObj, qry = qry)
 
 })
 
@@ -187,6 +193,38 @@ setGeneric("GetQueryResults", function(ConnObj, qry, dataTable = FALSE){standard
 setMethod(f = "GetQueryResults", signature = "SQLiteConn", definition = function(ConnObj, qry, dataTable = FALSE){
 
   data.table::fread(text = ExecuteStatement(ConnObj = ConnObj, qry = qry), sep = "|", data.table = dataTable)
+
+
+})
+
+setGeneric("GetTable", function(ConnObj, table, limit = NULL, dataTable = FALSE){standardGeneric("GetTable")}) # Slight overhead due to checks if table exists
+setMethod(f = "GetTable", signature = "SQLiteConn", definition = function(ConnObj, table, limit = NULL, dataTable = FALSE){
+
+  if (table %not_in% chk_tbls(obj)) {
+    UpdateSQLiteConnection(ConnObj = ConnObj)
+
+    if (table %not_in% chk_tbls(obj)) return(FALSE)
+
+    }
+
+  if (length(table) > 1) {
+
+    print("Length of table is superior to 1. Returning results for the 1st element only.")
+
+    table <- table[1]
+
+  }
+
+  qry <- sprintf("SELECT * FROM %s ", table)
+
+  if (!is.numeric(limit)) limit <- NULL
+  if (!is.null(limit)) {
+    qry <- paste0(qry, "LIMIT ", as.integer(limit), ";")
+  } else {
+      qry <- paste0(trimws(qry), ";")
+    }
+
+  GetQueryResults(ConnObj = ConnObj, qry = qry, dataTable = dataTable)
 
 
 })
@@ -236,7 +274,7 @@ setMethod(f = "InsertData", signature = "SQLiteConn", definition = function(Conn
 setGeneric("ExecuteStatement", function(ConnObj, qry){standardGeneric("ExecuteStatement")})
 setMethod(f = "ExecuteStatement", signature = "SQLiteConn", definition = function(ConnObj, qry){
 
-  isValid <- IsValidSQLiteConnection(ConnObj = ConnObj)
+  isValid <- try(IsValidSQLiteConnection(ConnObj = ConnObj))
 
   if (!isTRUE(isValid)) stop("Invalid connection object.\nStopping now.")
 
@@ -245,7 +283,7 @@ setMethod(f = "ExecuteStatement", signature = "SQLiteConn", definition = functio
   opts <- create_options_string(options_list = options(ConnObj))
 
   argt <- sprintf("%s %s %s", ConnObj@db_path, opts, qry)
-  argt <- paste0(ConnObj@db_path, " ", "'.headers on'", " ", qry)
+  argt <- paste0(ConnObj@db_path, " ", "'.headers on'", " ", qry) #TODO(): unlist all options.
   system2(command = ConnObj@binary, args = argt, stdout = TRUE)
 
 })
@@ -267,10 +305,10 @@ setMethod(f = "UpdateSQLiteConnection", signature = "SQLiteConn", definition = f
 
   # recreate remaining slots.
 
-  #ConnObj@tables <- chk_tbls(ConnObj) # not working -> find a way. NECESSARY?
-  #ConnObj@fields <- lapply(ConnObj@tables, chk_tbl_headers, conn = ConnObj) -> not working, find a way.
+  ConnObj@tables <- chk_tbls(ConnObj) # not working -> find a way. NECESSARY?
+  ConnObj@fields <- lapply(ConnObj@tables, chk_tbl_headers, conn = ConnObj) #-> not working, find a way.
   #Split the update in several steps?
-  ConnObj@sha3sum <- system(paste0(.Object@conn_string, " '.sha3sum'"), intern = TRUE)[2]
+  ConnObj@sha3sum <- system(paste0(ConnObj@conn_string, " '.sha3sum'"), intern = TRUE)[2]
 
   validObject(ConnObj)
 

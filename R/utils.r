@@ -76,6 +76,19 @@ create_options_string <- function(options_list){
 
 }
 
+create_table_string <- function(data) {
+
+  if (!is.list(data)) stop("Expecting a names list of column types.")
+  if (is.null(names(data)) | length(names(data)) == 0) stop("Please provide a named list of cilumn types.")
+
+  #TODO(): Check for data types and/or affinities
+
+  paste(names(lst), unlist(lst), collapse = ", ")
+
+}
+
+'%not_in%' <- Negate('%in%')
+
 # CONVERT DATA FRAMES TO CHARACTER VECTORS ----
 
 convert_dt_to_input_string <- function(data){
